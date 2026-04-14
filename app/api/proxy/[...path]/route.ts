@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
 // Variable de servidor (sin NEXT_PUBLIC_) — nunca expuesta al browser
-const BACKEND = process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
+const RAW_BACKEND = process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
+const BACKEND = RAW_BACKEND.endsWith("/") ? RAW_BACKEND.slice(0, -1) : RAW_BACKEND;
 
 async function proxyRequest(
   request: NextRequest,
@@ -20,6 +21,7 @@ async function proxyRequest(
   // Bloquear rutas sensibles o de agentes que no deben ser accedidas vía proxy del dashboard
   const BLOCKED_PREFIXES = ["auth/login", "auth/register", "contacts", "contactos", "calls", "sync", "encuestas"];
   if (BLOCKED_PREFIXES.some(prefix => backendPath === prefix || backendPath.startsWith(`${prefix}/`))) {
+    console.log(`[Proxy] BLOCKED internally by Next.js rules: ${backendPath}`);
     return NextResponse.json({ error: "Ruta de API prohibida" }, { status: 403 });
   }
 
@@ -42,9 +44,14 @@ async function proxyRequest(
       body,
     });
 
+    if (backendRes.status === 403) {
+      console.log(`[Proxy] El backend devolvió 403 para backendPath=${backendPath}, URL completa=${targetUrl}`);
+    }
+
     const data = await backendRes.json().catch(() => ({}));
     return NextResponse.json(data, { status: backendRes.status });
-  } catch {
+  } catch (err: any) {
+    console.error(`[Proxy] Excepción en fetch hacia ${targetUrl}:`, err);
     return NextResponse.json(
       { error: "Error de conexión con el backend" },
       { status: 502 }
