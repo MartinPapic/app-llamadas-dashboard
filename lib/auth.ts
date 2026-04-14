@@ -2,8 +2,11 @@ const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
 const TOKEN_KEY = "admin_token";
 
 export interface LoginResult {
-  token: string;
+  accessToken: string;
   refreshToken: string;
+  rol: string;
+  nombre: string;
+  userId: string;
 }
 
 export async function login(email: string, password: string): Promise<LoginResult> {
@@ -20,9 +23,9 @@ export async function login(email: string, password: string): Promise<LoginResul
 
   const data: LoginResult = await res.json();
   if (typeof window !== "undefined") {
-    localStorage.setItem(TOKEN_KEY, data.token);
+    localStorage.setItem(TOKEN_KEY, data.accessToken);
     // Guardamos también en cookie para que middleware.ts pueda leerlo
-    document.cookie = `${TOKEN_KEY}=${data.token}; path=/; SameSite=Strict`;
+    document.cookie = `${TOKEN_KEY}=${data.accessToken}; path=/; SameSite=Strict`;
   }
   return data;
 }
