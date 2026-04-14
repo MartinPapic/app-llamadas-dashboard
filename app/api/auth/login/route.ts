@@ -51,9 +51,10 @@ export async function POST(request: NextRequest) {
     });
 
     return response;
-  } catch {
+  } catch (error: any) {
+    console.error("Fetch API error:", error);
     return NextResponse.json(
-      { error: "Error de conexión con el servidor" },
+      { error: "Error de conexión con el servidor", detalle: error.message },
       { status: 502 }
     );
   }
