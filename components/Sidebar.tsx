@@ -1,7 +1,9 @@
 "use client";
+
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { LayoutDashboard, Phone, Users } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { LayoutDashboard, Phone, Users, LogOut } from "lucide-react";
+import { logout } from "@/lib/auth";
 
 const links = [
   { href: "/",          label: "Dashboard", icon: LayoutDashboard },
@@ -11,11 +13,19 @@ const links = [
 
 export function Sidebar() {
   const path = usePathname();
+  const router = useRouter();
+
+  function handleLogout() {
+    logout();
+    router.push("/login");
+  }
+
   return (
     <aside className="w-56 min-h-screen bg-slate-900 text-white flex flex-col p-4 gap-1 shrink-0">
       <div className="text-lg font-bold mb-6 px-2 flex items-center gap-2">
         <span className="text-2xl">📞</span> App Llamadas
       </div>
+
       {links.map(({ href, label, icon: Icon }) => (
         <Link
           key={href}
@@ -30,6 +40,20 @@ export function Sidebar() {
           {label}
         </Link>
       ))}
+
+      {/* Spacer */}
+      <div className="flex-1" />
+
+      {/* Logout */}
+      <button
+        id="sidebar-logout"
+        onClick={handleLogout}
+        className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-400
+                   hover:bg-red-900/40 hover:text-red-300 transition-colors w-full text-left"
+      >
+        <LogOut className="h-4 w-4 shrink-0" />
+        Cerrar sesión
+      </button>
     </aside>
   );
 }

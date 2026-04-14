@@ -30,8 +30,33 @@ export interface Llamada {
   observacion: string | null;
 }
 
+function getAuthHeaders(): HeadersInit {
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("admin_token") : null;
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 async function safeFetch<T>(url: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(url, { cache: "no-store", ...options });
+  const res = await fetch(url, {
+    cache: "no-store",
+    ...options,
+    headers: {
+      ...getAuthHeaders(),
+      ...(options?.headers ?? {}),
+    },
+  });
+
+  if (res.status === 401 || res.status === 403) {
+    // Token expired or invalid — redirect to login
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("admin_token");
+      document.cookie =
+        "admin_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+      window.location.href = "/login";
+    }
+    throw new Error("Sesión expirada. Redirigiendo al login…");
+  }
+
   if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
   return res.json() as Promise<T>;
 }
