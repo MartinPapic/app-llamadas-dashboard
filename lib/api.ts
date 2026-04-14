@@ -58,24 +58,34 @@ function getAuthHeaders(): HeadersInit {
 }
 
 async function safeFetch<T>(url: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(url, {
-    cache: "no-store",
-    ...options,
-    headers: {
-      ...getAuthHeaders(),
-      ...(options?.headers ?? {}),
-    },
-  });
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      cache: "no-store",
+      ...options,
+      headers: {
+        ...getAuthHeaders(),
+        ...(options?.headers ?? {}),
+      },
+    });
+  } catch {
+    throw new Error("Error de red: no se pudo conectar con el servidor. Verifica tu conexión.");
+  }
 
-  if (res.status === 401 || res.status === 403) {
-    // Token expired or invalid — redirect to login
+  if (res.status === 401) {
+    // Token expirado — destruir sesión y redirigir
     if (typeof window !== "undefined") {
       localStorage.removeItem("admin_token");
       document.cookie =
         "admin_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
       window.location.href = "/login";
     }
-    throw new Error("Sesión expirada. Redirigiendo al login…");
+    throw new Error("Sesión expirada. Inicia sesión nuevamente.");
+  }
+
+  if (res.status === 403) {
+    // Sin permisos, pero la sesión sigue válida — no destruir
+    throw new Error("Acceso denegado (403): tu usuario no tiene permisos para este recurso.");
   }
 
   if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
