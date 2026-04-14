@@ -27,16 +27,15 @@ export default function UsuariosPage() {
   const [rol, setRol] = useState("agente");
   const [isSaving, setIsSaving] = useState(false);
 
-  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+  const apiBaseUrl = "/api/proxy";
 
   const fetchUsuarios = async () => {
     try {
       setLoading(true);
-      const token = getToken();
       const res = await fetch(`${apiBaseUrl}/usuarios`, {
         headers: {
-          Authorization: `Bearer ${token}`,
-        },
+          "Content-Type": "application/json"
+        }
       });
       if (!res.ok) throw new Error("Error al obtener usuarios");
       const data = await res.json();
@@ -82,7 +81,6 @@ export default function UsuariosPage() {
     setIsSaving(true);
     setError("");
     try {
-      const token = getToken();
       const url =
         modalMode === "crear"
           ? `${apiBaseUrl}/usuarios`
@@ -99,8 +97,7 @@ export default function UsuariosPage() {
       const res = await fetch(url, {
         method,
         headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
         },
         body: JSON.stringify(payload),
       });
@@ -122,12 +119,8 @@ export default function UsuariosPage() {
   const handleDelete = async (id: string, email: string) => {
     if (!confirm(`¿Estás seguro de eliminar al usuario ${email}?`)) return;
     try {
-      const token = getToken();
       const res = await fetch(`${apiBaseUrl}/usuarios/${id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        method: "DELETE"
       });
 
       if (!res.ok) {
