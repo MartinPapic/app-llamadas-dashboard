@@ -6,12 +6,13 @@ import { LayoutDashboard, Phone, Users, LogOut, BarChart3, ClipboardCheck } from
 import { logout } from "@/lib/auth";
 
 const links = [
-  { href: "/",          label: "Dashboard", icon: LayoutDashboard },
-  { href: "/contactos", label: "Contactos", icon: Users },
-  { href: "/llamadas",  label: "Llamadas",  icon: Phone },
-  { href: "/analiticas-calidad", label: "Analíticas", icon: BarChart3 },
+  { href: "/",          label: "Supervisor (En vivo)", icon: LayoutDashboard },
+  { href: "/analytics/agents", label: "Productividad", icon: BarChart3 },
+  { href: "/analytics/funnel", label: "Salud de Base", icon: BarChart3 },
+  { href: "/contactos", label: "Directorio", icon: Users },
+  { href: "/llamadas",  label: "Historial Crudo",  icon: Phone },
   { href: "/encuestas", label: "Encuestas", icon: ClipboardCheck },
-  { href: "/usuarios",  label: "Usuarios",  icon: Users },
+  { href: "/usuarios",  label: "Agentes",  icon: Users },
 ];
 
 export function Sidebar() {

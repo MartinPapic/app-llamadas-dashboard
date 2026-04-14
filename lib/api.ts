@@ -9,6 +9,18 @@ export interface Metricas {
   tasaContacto: number;
 }
 
+export interface RealtimeMetrics {
+  totalAgentesActivos?: number;
+  llamadasEmitidasHoy: number;
+  tasaContactabilidadDiaria: number;
+  distribucionResultados: Record<string, number>;
+}
+
+export interface FunnelMetrics {
+  totalBase: number;
+  estados: Record<string, number>;
+}
+
 export interface Contacto {
   id: string;
   nombre: string;
@@ -73,6 +85,12 @@ async function safeFetch<T>(url: string, options?: RequestInit): Promise<T> {
 export const api = {
   metricas: (): Promise<Metricas> =>
     safeFetch<Metricas>(`${BASE}/metrics`),
+
+  realtimeMetrics: (): Promise<RealtimeMetrics> =>
+    safeFetch<RealtimeMetrics>(`${BASE}/analytics/realtime`),
+
+  funnelMetrics: (): Promise<FunnelMetrics> =>
+    safeFetch<FunnelMetrics>(`${BASE}/analytics/funnel`),
 
   contactos: (): Promise<Contacto[]> =>
     safeFetch<Contacto[]>(`${BASE}/admin/contacts`),
