@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { api, type Contacto } from "@/lib/api";
 import { ContactosTable } from "@/components/ContactosTable";
+import { UploadCSV } from "@/components/UploadCSV";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 
@@ -11,13 +12,18 @@ export default function ContactosPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const fetchContactos = () => {
+    setLoading(true);
     api.contactos()
       .then(setContactos)
       .catch((err: unknown) =>
         setError(err instanceof Error ? err.message : "Error al cargar contactos")
       )
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchContactos();
   }, []);
 
   const pendientes  = contactos.filter((c) => c.estado === "PENDIENTE").length;
@@ -48,6 +54,9 @@ export default function ContactosPage() {
         </div>
       ) : (
         <>
+          {/* Upload Component */}
+          <UploadCSV onSuccess={fetchContactos} />
+
           {/* Resumen rápido */}
           <div className="grid grid-cols-4 gap-3">
             {[

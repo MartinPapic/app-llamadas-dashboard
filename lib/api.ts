@@ -16,6 +16,7 @@ export interface Contacto {
   estado: "PENDIENTE" | "EN_GESTION" | "CONTACTADO" | "DESISTIDO";
   intentos: number;
   fechaCreacion: number;
+  agenteId?: string;
 }
 
 export interface Llamada {
@@ -76,5 +77,15 @@ export const api = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...c, id: crypto.randomUUID() }),
+    }),
+
+  agentes: (): Promise<Array<{ id: string; nombre: string; email: string }>> =>
+    safeFetch(`${BASE}/api/dashboard/agentes`),
+
+  uploadContactos: (contactos: Contacto[]): Promise<{ mensaje: string; cantidad: number }> =>
+    safeFetch(`${BASE}/api/dashboard/contactos/upload`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(contactos),
     }),
 };
