@@ -20,7 +20,10 @@ export async function login(email: string, password: string): Promise<LoginResul
 
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
-    throw new Error(data?.error ?? `Error ${res.status}: credenciales inválidas`);
+    const msg = data?.detalle
+      ? `${data?.error ?? "Error"}: ${data.detalle}`
+      : (data?.error ?? `Error ${res.status}: credenciales inválidas`);
+    throw new Error(msg);
   }
 
   const data: LoginResult = await res.json();
