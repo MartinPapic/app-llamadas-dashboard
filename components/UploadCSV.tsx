@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { UploadCloud, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import { UploadCloud, CheckCircle, AlertCircle, Loader2, Download } from "lucide-react";
 import { api, type Contacto } from "@/lib/api";
 
 interface UploadCSVProps {
@@ -89,12 +89,33 @@ export function UploadCSV({ onSuccess }: UploadCSVProps) {
     }
   };
 
+  const handleDownloadTemplate = () => {
+    const csvContent = "nombre,telefono,email_agente\nEjemplo Nombre,555-1234,ejemplo@cem.com\n";
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "plantilla_contactos.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="bg-white border rounded-xl p-6 shadow-sm">
       <h3 className="text-lg font-semibold text-slate-800 mb-2">Importar Contactos</h3>
-      <p className="text-sm text-slate-500 mb-4">
-        Sube un archivo CSV con las columnas: <code className="bg-slate-100 px-1 py-0.5 rounded text-indigo-600">nombre,telefono,email_agente</code>
-      </p>
+      <div className="flex items-center justify-between mb-4">
+        <p className="text-sm text-slate-500">
+          Sube un archivo CSV con las columnas: <code className="bg-slate-100 px-1 py-0.5 rounded text-indigo-600">nombre,telefono,email_agente</code>
+        </p>
+        <button
+          onClick={handleDownloadTemplate}
+          className="flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-800 font-medium transition-colors bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg"
+        >
+          <Download className="w-4 h-4" />
+          Descargar Plantilla
+        </button>
+      </div>
 
       {error && (
         <div className="flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-sm mb-4">
