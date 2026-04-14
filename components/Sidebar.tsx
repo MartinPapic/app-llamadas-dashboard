@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Phone, Users, LogOut, BarChart3 } from "lucide-react";
+import { LayoutDashboard, Phone, Users, LogOut, BarChart3, ClipboardCheck } from "lucide-react";
 import { logout } from "@/lib/auth";
 
 const links = [
@@ -10,6 +10,7 @@ const links = [
   { href: "/contactos", label: "Contactos", icon: Users },
   { href: "/llamadas",  label: "Llamadas",  icon: Phone },
   { href: "/analiticas-calidad", label: "Analíticas", icon: BarChart3 },
+  { href: "/encuestas", label: "Encuestas", icon: ClipboardCheck },
   { href: "/usuarios",  label: "Usuarios",  icon: Users },
 ];
 

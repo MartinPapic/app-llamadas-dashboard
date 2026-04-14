@@ -31,6 +31,14 @@ export interface Llamada {
   observacion: string | null;
 }
 
+export interface Encuesta {
+  id: string;
+  contactoId: string;
+  url: string;
+  estado: "COMPLETA" | "INCOMPLETA" | "NO_REALIZADA";
+  fecha: number;
+}
+
 function getAuthHeaders(): HeadersInit {
   const token =
     typeof window !== "undefined" ? localStorage.getItem("admin_token") : null;
@@ -68,6 +76,9 @@ export const api = {
 
   contactos: (): Promise<Contacto[]> =>
     safeFetch<Contacto[]>(`${BASE}/admin/contacts`),
+
+  encuestas: (): Promise<Encuesta[]> =>
+    safeFetch<Encuesta[]>(`${BASE}/admin/surveys`),
 
   llamadas: (): Promise<Llamada[]> =>
     safeFetch<Llamada[]>(`${BASE}/admin/calls`),
