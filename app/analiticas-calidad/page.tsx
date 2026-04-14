@@ -33,7 +33,7 @@ export default function AnaliticasCalidadPage() {
   }, []);
 
   const metricasPorAgente = useMemo<AgentStats[]>(() => {
-    if (!agentes.length || !llamadas.length) return [];
+    if (agentes.length === 0 && llamadas.length === 0) return [];
 
     const statsMap = new Map<string, AgentStats>();
 
