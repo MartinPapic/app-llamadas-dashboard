@@ -45,7 +45,15 @@ async function proxyRequest(
   }
 }
 
-export const GET    = (req: NextRequest, ctx: { params: { path: string[] } }) => proxyRequest(req, ctx.params);
-export const POST   = (req: NextRequest, ctx: { params: { path: string[] } }) => proxyRequest(req, ctx.params);
-export const PUT    = (req: NextRequest, ctx: { params: { path: string[] } }) => proxyRequest(req, ctx.params);
-export const DELETE = (req: NextRequest, ctx: { params: { path: string[] } }) => proxyRequest(req, ctx.params);
+export async function GET(req: NextRequest, ctx: { params: Promise<{ path: string[] }> }) {
+  return proxyRequest(req, await ctx.params);
+}
+export async function POST(req: NextRequest, ctx: { params: Promise<{ path: string[] }> }) {
+  return proxyRequest(req, await ctx.params);
+}
+export async function PUT(req: NextRequest, ctx: { params: Promise<{ path: string[] }> }) {
+  return proxyRequest(req, await ctx.params);
+}
+export async function DELETE(req: NextRequest, ctx: { params: Promise<{ path: string[] }> }) {
+  return proxyRequest(req, await ctx.params);
+}
