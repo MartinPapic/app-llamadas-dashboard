@@ -10,6 +10,7 @@ const links = [
   { href: "/contactos", label: "Contactos", icon: Users },
   { href: "/llamadas",  label: "Llamadas",  icon: Phone },
   { href: "/analiticas-calidad", label: "Analíticas", icon: BarChart3 },
+  { href: "/usuarios",  label: "Usuarios",  icon: Users },
 ];
 
 export function Sidebar() {
