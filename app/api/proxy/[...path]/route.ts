@@ -16,6 +16,13 @@ async function proxyRequest(
   }
 
   const backendPath = params.path.join("/");
+
+  // Bloquear rutas sensibles o de agentes que no deben ser accedidas vía proxy del dashboard
+  const BLOCKED_PREFIXES = ["auth/login", "auth/register", "contacts", "contactos", "calls", "sync", "encuestas"];
+  if (BLOCKED_PREFIXES.some(prefix => backendPath === prefix || backendPath.startsWith(`${prefix}/`))) {
+    return NextResponse.json({ error: "Ruta de API prohibida" }, { status: 403 });
+  }
+
   const { searchParams } = new URL(request.url);
   const qs = searchParams.toString();
   const targetUrl = `${BACKEND}/${backendPath}${qs ? `?${qs}` : ""}`;

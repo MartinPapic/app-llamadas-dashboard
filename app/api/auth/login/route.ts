@@ -18,6 +18,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(data, { status: backendRes.status });
     }
 
+    if (data.rol?.toLowerCase() !== "admin") {
+      return NextResponse.json(
+        { error: "Acceso denegado: Solo administradores" },
+        { status: 403 }
+      );
+    }
+
     const response = NextResponse.json({
       rol: data.rol,
       nombre: data.nombre,
