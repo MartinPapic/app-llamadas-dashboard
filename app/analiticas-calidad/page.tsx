@@ -51,8 +51,20 @@ export default function AnaliticasCalidadPage() {
 
     // Procesar iterativamente cada llamada
     llamadas.forEach((llamada) => {
-      const stats = statsMap.get(llamada.usuarioId);
-      if (!stats) return;
+      let stats = statsMap.get(llamada.usuarioId);
+      
+      // Si el usuario (ej. un admin o usuario eliminado) hizo llamadas pero no está en la lista de agentes
+      if (!stats) {
+        stats = {
+          id: llamada.usuarioId,
+          nombre: "Supervisor / Admin (Testing)",
+          totalEmitidas: 0,
+          totalNoContesta: 0,
+          intentosCortos: 0,
+          indiceAnomalia: 0,
+        };
+        statsMap.set(llamada.usuarioId, stats);
+      }
 
       stats.totalEmitidas++;
 
