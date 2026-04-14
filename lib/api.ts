@@ -64,26 +64,26 @@ async function safeFetch<T>(url: string, options?: RequestInit): Promise<T> {
 
 export const api = {
   metricas: (): Promise<Metricas> =>
-    safeFetch<Metricas>(`${BASE}/api/dashboard/metricas`),
+    safeFetch<Metricas>(`${BASE}/metrics`),
 
   contactos: (): Promise<Contacto[]> =>
-    safeFetch<Contacto[]>(`${BASE}/api/dashboard/contactos`),
+    safeFetch<Contacto[]>(`${BASE}/admin/contacts`),
 
   llamadas: (): Promise<Llamada[]> =>
-    safeFetch<Llamada[]>(`${BASE}/api/dashboard/llamadas`),
+    safeFetch<Llamada[]>(`${BASE}/admin/calls`),
 
   crearContacto: (c: Omit<Contacto, "id">): Promise<Contacto> =>
-    safeFetch<Contacto>(`${BASE}/api/dashboard/contactos`, {
+    safeFetch<Contacto>(`${BASE}/admin/contacts`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...c, id: crypto.randomUUID() }),
     }),
 
   agentes: (): Promise<Array<{ id: string; nombre: string; email: string }>> =>
-    safeFetch(`${BASE}/api/dashboard/agentes`),
+    safeFetch(`${BASE}/admin/agents`),
 
   uploadContactos: (contactos: Contacto[]): Promise<{ mensaje: string; cantidad: number }> =>
-    safeFetch(`${BASE}/api/dashboard/contactos/upload`, {
+    safeFetch(`${BASE}/admin/contacts/upload`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(contactos),
