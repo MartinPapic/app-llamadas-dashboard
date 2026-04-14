@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Phone, Users, LogOut } from "lucide-react";
+import { LayoutDashboard, Phone, Users, LogOut, BarChart3 } from "lucide-react";
 import { logout } from "@/lib/auth";
 
 const links = [
   { href: "/",          label: "Dashboard", icon: LayoutDashboard },
   { href: "/contactos", label: "Contactos", icon: Users },
   { href: "/llamadas",  label: "Llamadas",  icon: Phone },
+  { href: "/analiticas-calidad", label: "Analíticas", icon: BarChart3 },
 ];
 
 export function Sidebar() {
