@@ -1,4 +1,6 @@
-const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
+// Todas las llamadas van a través del proxy Next.js (/api/proxy/...)
+// que inyecta el token HttpOnly desde el servidor — el token nunca es accesible en JS.
+const BASE = "/api/proxy";
 
 export interface Metricas {
   totalContactos: number;
@@ -51,12 +53,6 @@ export interface Encuesta {
   fecha: number;
 }
 
-function getAuthHeaders(): HeadersInit {
-  const token =
-    typeof window !== "undefined" ? localStorage.getItem("admin_token") : null;
-  return token ? { Authorization: `Bearer ${token}` } : {};
-}
-
 async function safeFetch<T>(url: string, options?: RequestInit): Promise<T> {
   let res: Response;
   try {
@@ -64,28 +60,22 @@ async function safeFetch<T>(url: string, options?: RequestInit): Promise<T> {
       cache: "no-store",
       ...options,
       headers: {
-        ...getAuthHeaders(),
+        "Content-Type": "application/json",
         ...(options?.headers ?? {}),
       },
     });
   } catch {
-    throw new Error("Error de red: no se pudo conectar con el servidor. Verifica tu conexión.");
+    throw new Error("Error de red: no se pudo conectar con el servidor.");
   }
 
   if (res.status === 401) {
-    // Token expirado — destruir sesión y redirigir
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("admin_token");
-      document.cookie =
-        "admin_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-      window.location.href = "/login";
-    }
-    throw new Error("Sesión expirada. Inicia sesión nuevamente.");
+    // El proxy devuelve 401 cuando la cookie expiró — redirigir a login
+    if (typeof window !== "undefined") window.location.href = "/login";
+    throw new Error("Sesión expirada.");
   }
 
   if (res.status === 403) {
-    // Sin permisos, pero la sesión sigue válida — no destruir
-    throw new Error("Acceso denegado (403): tu usuario no tiene permisos para este recurso.");
+    throw new Error("Acceso denegado (403): permisos insuficientes.");
   }
 
   if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);

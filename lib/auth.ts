@@ -1,16 +1,18 @@
-const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
 const TOKEN_KEY = "admin_token";
 
 export interface LoginResult {
-  accessToken: string;
-  refreshToken: string;
   rol: string;
   nombre: string;
   userId: string;
 }
 
+/**
+ * Llama al proxy interno de Next.js (/api/auth/login) que setea
+ * el token como cookie HttpOnly desde el servidor.
+ * El token NUNCA toca JavaScript del navegador.
+ */
 export async function login(email: string, password: string): Promise<LoginResult> {
-  const res = await fetch(`${BASE}/auth/login`, {
+  const res = await fetch("/api/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
@@ -22,22 +24,29 @@ export async function login(email: string, password: string): Promise<LoginResul
   }
 
   const data: LoginResult = await res.json();
+  // Guardar metadata no sensible en localStorage (solo para UI, no para auth)
   if (typeof window !== "undefined") {
-    localStorage.setItem(TOKEN_KEY, data.accessToken);
-    // Guardamos también en cookie para que middleware.ts pueda leerlo
-    document.cookie = `${TOKEN_KEY}=${data.accessToken}; path=/; SameSite=Strict`;
+    localStorage.setItem("admin_rol", data.rol);
+    localStorage.setItem("admin_nombre", data.nombre);
   }
   return data;
 }
 
-export function logout() {
+export async function logout() {
+  await fetch("/api/auth/logout", { method: "POST" });
   if (typeof window !== "undefined") {
-    localStorage.removeItem(TOKEN_KEY);
-    document.cookie = `${TOKEN_KEY}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+    localStorage.removeItem("admin_rol");
+    localStorage.removeItem("admin_nombre");
   }
 }
 
 export function getToken(): string | null {
+  // El token ya no es accesible en el browser (HttpOnly)
+  // Esta función solo se mantiene por compatibilidad con código existente
+  return null;
+}
+
+export function getUserRol(): string | null {
   if (typeof window === "undefined") return null;
-  return localStorage.getItem(TOKEN_KEY);
+  return localStorage.getItem("admin_rol");
 }

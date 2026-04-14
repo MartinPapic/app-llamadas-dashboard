@@ -19,8 +19,8 @@ export function Sidebar() {
   const path = usePathname();
   const router = useRouter();
 
-  function handleLogout() {
-    logout();
+  async function handleLogout() {
+    await logout();
     router.push("/login");
   }
 
