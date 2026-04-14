@@ -33,7 +33,7 @@ export default function UsuariosPage() {
     try {
       setLoading(true);
       const token = getToken();
-      const res = await fetch(`${apiBaseUrl}/api/usuarios`, {
+      const res = await fetch(`${apiBaseUrl}/usuarios`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -85,8 +85,8 @@ export default function UsuariosPage() {
       const token = getToken();
       const url =
         modalMode === "crear"
-          ? `${apiBaseUrl}/api/usuarios`
-          : `${apiBaseUrl}/api/usuarios/${selectedUsuario?.id}`;
+          ? `${apiBaseUrl}/usuarios`
+          : `${apiBaseUrl}/usuarios/${selectedUsuario?.id}`;
       const method = modalMode === "crear" ? "POST" : "PUT";
 
       const payload = {
@@ -123,7 +123,7 @@ export default function UsuariosPage() {
     if (!confirm(`¿Estás seguro de eliminar al usuario ${email}?`)) return;
     try {
       const token = getToken();
-      const res = await fetch(`${apiBaseUrl}/api/usuarios/${id}`, {
+      const res = await fetch(`${apiBaseUrl}/usuarios/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
