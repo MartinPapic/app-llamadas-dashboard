@@ -6,13 +6,26 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
+    console.log("[login] Calling backend:", `${BACKEND}/auth/login`);
     const backendRes = await fetch(`${BACKEND}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
+    console.log("[login] Backend status:", backendRes.status);
 
-    const data = await backendRes.json();
+    const rawText = await backendRes.text();
+    console.log("[login] Backend raw response:", rawText.slice(0, 200));
+
+    let data: any = {};
+    try {
+      data = rawText ? JSON.parse(rawText) : {};
+    } catch {
+      return NextResponse.json(
+        { error: "El servidor respondió con formato inválido", detalle: rawText.slice(0, 200) },
+        { status: 502 }
+      );
+    }
 
     if (!backendRes.ok) {
       return NextResponse.json(data, { status: backendRes.status });
