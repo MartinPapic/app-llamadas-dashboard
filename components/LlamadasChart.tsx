@@ -11,19 +11,17 @@ import {
 import { Llamada } from "@/lib/api";
 
 const COLORS: Record<string, string> = {
-  CONTESTA:    "#22c55e",
-  NO_CONTESTA: "#ef4444",
-  OCUPADO:     "#f59e0b",
-  INVALIDO:    "#94a3b8",
-  SIN_RESULTADO: "#6366f1",
+  CONTACTADO_EFECTIVO:    "#22c55e",
+  CONTACTADO_NO_EFECTIVO: "#f59e0b",
+  NO_CONTACTADO:          "#ef4444",
+  SIN_RESULTADO:          "#94a3b8",
 };
 
 const LABELS: Record<string, string> = {
-  CONTESTA:     "Contesta",
-  NO_CONTESTA:  "No Contesta",
-  OCUPADO:      "Ocupado",
-  INVALIDO:     "Inválido",
-  SIN_RESULTADO: "Sin resultado",
+  CONTACTADO_EFECTIVO:    "Efectivo",
+  CONTACTADO_NO_EFECTIVO: "No Efectivo",
+  NO_CONTACTADO:          "No Contactado",
+  SIN_RESULTADO:          "Sin resultado",
 };
 
 export function LlamadasChart({ llamadas }: { llamadas: Llamada[] }) {

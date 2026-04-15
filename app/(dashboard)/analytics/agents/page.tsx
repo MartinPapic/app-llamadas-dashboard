@@ -65,7 +65,7 @@ export default function AgentPerformancePage() {
 
       stats.totalEmitidas++;
 
-      if (llamada.resultado === "NO_CONTESTA" || llamada.resultado === "OCUPADO" || llamada.resultado === "INVALIDO") {
+      if (llamada.resultado === "NO_CONTACTADO" || llamada.resultado === "CONTACTADO_NO_EFECTIVO") {
         stats.totalNoContesta++;
         
         // Detección de "Llamada Fantasma" paramétrica < 15 segs

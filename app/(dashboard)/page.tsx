@@ -46,10 +46,9 @@ export default function SupervisorRealtimePage() {
   }
 
   const m = metrics!;
-  const contesta = m.distribucionResultados["CONTESTA"] || 0;
-  const noContesta = m.distribucionResultados["NO_CONTESTA"] || 0;
-  const ocupado = m.distribucionResultados["OCUPADO"] || 0;
-  const invalido = m.distribucionResultados["INVALIDO"] || 0;
+  const contesta = m.distribucionResultados["CONTACTADO_EFECTIVO"] || 0;
+  const noEfectivo = m.distribucionResultados["CONTACTADO_NO_EFECTIVO"] || 0;
+  const noContesta = m.distribucionResultados["NO_CONTACTADO"] || 0;
 
   const contactabilidadOk = m.tasaContactabilidadDiaria > 15.0;
 
@@ -109,31 +108,23 @@ export default function SupervisorRealtimePage() {
           <CardContent className="pt-6 flex flex-col items-center text-center">
             <CheckCircle2 className="w-10 h-10 text-emerald-500 mb-3" />
             <div className="text-3xl font-bold text-slate-800">{contesta}</div>
-            <p className="text-sm font-medium text-emerald-600 mt-1">Conectadas</p>
+            <p className="text-sm font-medium text-emerald-600 mt-1">Efectivas</p>
           </CardContent>
         </Card>
         
         <Card className="bg-white border-slate-200 shadow-sm">
           <CardContent className="pt-6 flex flex-col items-center text-center">
+            <Clock className="w-10 h-10 text-amber-500 mb-3" />
+            <div className="text-3xl font-bold text-slate-800">{noEfectivo}</div>
+            <p className="text-sm font-medium text-amber-600 mt-1">No Efectivas</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white border-slate-200 shadow-sm">
+          <CardContent className="pt-6 flex flex-col items-center text-center">
             <XCircle className="w-10 h-10 text-rose-500 mb-3" />
             <div className="text-3xl font-bold text-slate-800">{noContesta}</div>
             <p className="text-sm font-medium text-rose-600 mt-1">No Contestan</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white border-slate-200 shadow-sm">
-          <CardContent className="pt-6 flex flex-col items-center text-center">
-            <Clock className="w-10 h-10 text-amber-500 mb-3" />
-            <div className="text-3xl font-bold text-slate-800">{ocupado}</div>
-            <p className="text-sm font-medium text-amber-600 mt-1">Ocupados</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white border-slate-200 shadow-sm">
-          <CardContent className="pt-6 flex flex-col items-center text-center">
-            <SearchX className="w-10 h-10 text-slate-400 mb-3" />
-            <div className="text-3xl font-bold text-slate-800">{invalido}</div>
-            <p className="text-sm font-medium text-slate-500 mt-1">Inválidos</p>
           </CardContent>
         </Card>
 
