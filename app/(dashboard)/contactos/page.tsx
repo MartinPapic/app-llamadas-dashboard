@@ -35,10 +35,10 @@ export default function ContactosPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-slate-800">
-          Contactos {!loading && `(${contactos.length})`}
+          Directorio {!loading && `(${contactos.length})`}
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Gestión y seguimiento de todos los contactos
+          Bolsa de trabajo global. Los contactos subidos aquí están disponibles para que cualquier agente los tome en tiempo real.
         </p>
       </div>
 

@@ -34,7 +34,7 @@ export function UploadCSV({ onSuccess }: UploadCSVProps) {
       if (lines.length < 2) throw new Error("El archivo está vacío o no tiene encabezados.");
 
       const headers = lines[0].toLowerCase().split(",");
-      const expectedHeaders = ["nombre", "telefono", "email_agente"];
+      const expectedHeaders = ["nombre", "telefono"];
       
       const missing = expectedHeaders.filter(h => !headers.includes(h));
       if (missing.length > 0) {
@@ -43,7 +43,6 @@ export function UploadCSV({ onSuccess }: UploadCSVProps) {
 
       const idxNombre = headers.indexOf("nombre");
       const idxTelefono = headers.indexOf("telefono");
-      const idxEmail = headers.indexOf("email_agente");
 
       const nuevosContactos: Contacto[] = [];
 
@@ -51,11 +50,8 @@ export function UploadCSV({ onSuccess }: UploadCSVProps) {
         const columns = lines[i].split(",");
         const nombre = columns[idxNombre]?.trim() || "Sin Nombre";
         const telefono = columns[idxTelefono]?.trim() || "";
-        const emailAgente = columns[idxEmail]?.trim().toLowerCase() || "";
 
-        if (!telefono) continue; // Skip if no phone
-
-        const agenteId = agentMap.get(emailAgente);
+        if (!telefono) continue; 
 
         nuevosContactos.push({
           id: crypto.randomUUID(),
@@ -64,7 +60,6 @@ export function UploadCSV({ onSuccess }: UploadCSVProps) {
           estado: "PENDIENTE",
           intentos: 0,
           fechaCreacion: Date.now(),
-          agenteId: agenteId || undefined,
         });
       }
 
@@ -90,7 +85,7 @@ export function UploadCSV({ onSuccess }: UploadCSVProps) {
   };
 
   const handleDownloadTemplate = () => {
-    const csvContent = "nombre,telefono,email_agente\nEjemplo Nombre,555-1234,ejemplo@cem.com\n";
+    const csvContent = "nombre,telefono\nJuan Perez,987654321\nMaria Lopez,912345678\n";
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -103,10 +98,10 @@ export function UploadCSV({ onSuccess }: UploadCSVProps) {
 
   return (
     <div className="bg-white border rounded-xl p-6 shadow-sm">
-      <h3 className="text-lg font-semibold text-slate-800 mb-2">Importar Contactos</h3>
+      <h3 className="text-lg font-semibold text-slate-800 mb-2">Importar Contactos (Pool Global)</h3>
       <div className="flex items-center justify-between mb-4">
         <p className="text-sm text-slate-500">
-          Sube un archivo CSV con las columnas: <code className="bg-slate-100 px-1 py-0.5 rounded text-indigo-600">nombre,telefono,email_agente</code>
+          Sube un archivo CSV con las columnas: <code className="bg-slate-100 px-1 py-0.5 rounded text-indigo-600">nombre,telefono</code>
         </p>
         <button
           onClick={handleDownloadTemplate}
