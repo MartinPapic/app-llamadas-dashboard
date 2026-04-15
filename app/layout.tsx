@@ -4,6 +4,7 @@ import "./globals.css";
 
 const geist = Geist({ subsets: ["latin"] });
 
+// Trigger redeploy: Pool Model & Hierarchy Update
 export const metadata: Metadata = {
   title: "App Llamadas — Admin",
   description: "Dashboard administrativo de gestión de llamadas CEM Ingeniería",
