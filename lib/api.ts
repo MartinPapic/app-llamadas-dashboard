@@ -40,8 +40,9 @@ export interface Llamada {
   fechaInicio: number;
   fechaFin: number | null;
   duracion: number | null;
-  resultado: "CONTESTA" | "NO_CONTESTA" | "OCUPADO" | "INVALIDO" | null;
+  resultado: "CONTACTADO_EFECTIVO" | "CONTACTADO_NO_EFECTIVO" | "NO_CONTACTADO" | null;
   tipificacion: string | null;
+  motivo: string | null;
   observacion: string | null;
 }
 

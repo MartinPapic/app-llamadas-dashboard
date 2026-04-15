@@ -11,10 +11,9 @@ import { es } from "date-fns/locale";
 import { Loader2 } from "lucide-react";
 
 const resultadoStyle: Record<string, { dot: string; label: string }> = {
-  CONTESTA:     { dot: "bg-green-500",  label: "Contesta" },
-  NO_CONTESTA:  { dot: "bg-red-500",    label: "No contesta" },
-  OCUPADO:      { dot: "bg-yellow-500", label: "Ocupado" },
-  INVALIDO:     { dot: "bg-slate-400",  label: "Inválido" },
+  CONTACTADO_EFECTIVO:    { dot: "bg-green-500",  label: "Efectivo" },
+  CONTACTADO_NO_EFECTIVO: { dot: "bg-amber-500", label: "No efectivo" },
+  NO_CONTACTADO:          { dot: "bg-red-500",    label: "No contactado" },
 };
 
 function formatDuracion(seg: number | null): string {
@@ -79,6 +78,7 @@ export default function LlamadasPage() {
                     <TableHead>Resultado</TableHead>
                     <TableHead>Duración</TableHead>
                     <TableHead>Tipificación</TableHead>
+                    <TableHead>Motivo</TableHead>
                     <TableHead>Observación</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -105,6 +105,7 @@ export default function LlamadasPage() {
                           {formatDuracion(l.duracion)}
                         </TableCell>
                         <TableCell className="text-sm">{l.tipificacion ?? "—"}</TableCell>
+                        <TableCell className="text-sm italic text-slate-500">{l.motivo ?? "—"}</TableCell>
                         <TableCell className="max-w-[200px] truncate text-sm text-slate-600">
                           {l.observacion ?? "—"}
                         </TableCell>
