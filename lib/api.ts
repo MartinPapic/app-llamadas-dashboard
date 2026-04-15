@@ -42,9 +42,11 @@ export interface Llamada {
   duracion: number | null;
   resultado: "CONTACTADO_EFECTIVO" | "CONTACTADO_NO_EFECTIVO" | "NO_CONTACTADO" | null;
   tipificacion: string | null;
-  motivo: string | null;
+  motivo: string | null; // Ahora obligatorio en nuevas gestiones
   observacion: string | null;
 }
+
+// Trigger redeploy: Mandatory motive implementation 2026-04-14
 
 export interface Encuesta {
   id: string;
