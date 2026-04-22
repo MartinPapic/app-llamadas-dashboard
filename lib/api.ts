@@ -23,6 +23,13 @@ export interface FunnelMetrics {
   estados: Record<string, number>;
 }
 
+export interface Proyecto {
+  id: string;
+  nombre: string;
+  instrumentoUrl: string;
+  fechaCreacion: number;
+}
+
 export interface Contacto {
   id: string;
   nombre: string;
@@ -31,6 +38,7 @@ export interface Contacto {
   intentos: number;
   fechaCreacion: number;
   agenteId?: string;
+  proyectoId?: string;
 }
 
 export interface Llamada {
@@ -42,8 +50,9 @@ export interface Llamada {
   duracion: number | null;
   resultado: "CONTACTADO_EFECTIVO" | "CONTACTADO_NO_EFECTIVO" | "NO_CONTACTADO" | null;
   tipificacion: string | null;
-  motivo: string | null; // Ahora obligatorio en nuevas gestiones
+  motivo: string | null;
   observacion: string | null;
+  proyectoId?: string;
 }
 
 // Trigger redeploy: Mandatory motive implementation 2026-04-14
@@ -86,8 +95,8 @@ async function safeFetch<T>(url: string, options?: RequestInit): Promise<T> {
 }
 
 export const api = {
-  metricas: (): Promise<Metricas> =>
-    safeFetch<Metricas>(`${BASE}/metrics`),
+  metricas: (proyectoId?: string): Promise<Metricas> =>
+    safeFetch<Metricas>(`${BASE}/metrics${proyectoId ? `?proyectoId=${proyectoId}` : ""}`),
 
   realtimeMetrics: (): Promise<RealtimeMetrics> =>
     safeFetch<RealtimeMetrics>(`${BASE}/analytics/realtime`),
@@ -104,6 +113,18 @@ export const api = {
   llamadas: (): Promise<Llamada[]> =>
     safeFetch<Llamada[]>(`${BASE}/admin/calls`),
 
+  proyectos: (): Promise<Proyecto[]> =>
+    safeFetch<Proyecto[]>(`${BASE}/api/proyectos`),
+
+  crearProyecto: (p: Omit<Proyecto, "id" | "fechaCreacion">): Promise<Proyecto> =>
+    safeFetch<Proyecto>(`${BASE}/api/proyectos`, {
+      method: "POST",
+      body: JSON.stringify(p),
+    }),
+
+  eliminarProyecto: (id: string): Promise<void> =>
+    safeFetch(`${BASE}/api/proyectos/${id}`, { method: "DELETE" }),
+
   crearContacto: (c: Omit<Contacto, "id">): Promise<Contacto> =>
     safeFetch<Contacto>(`${BASE}/admin/contacts`, {
       method: "POST",
@@ -114,8 +135,11 @@ export const api = {
   agentes: (): Promise<Array<{ id: string; nombre: string; email: string }>> =>
     safeFetch(`${BASE}/admin/agents`),
 
-  uploadContactos: (contactos: Contacto[]): Promise<{ mensaje: string; cantidad: number }> =>
-    safeFetch(`${BASE}/admin/contacts/upload`, {
+  agenteStats: (): Promise<any[]> =>
+    safeFetch(`${BASE}/analytics/agents`),
+
+  uploadContactos: (contactos: Contacto[], proyectoId?: string): Promise<{ mensaje: string; cantidad: number }> =>
+    safeFetch(`${BASE}/admin/contacts/upload${proyectoId ? `?proyectoId=${proyectoId}` : ""}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(contactos),

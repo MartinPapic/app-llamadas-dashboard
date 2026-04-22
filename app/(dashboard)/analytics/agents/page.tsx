@@ -16,15 +16,16 @@ interface AgentStats {
 
 export default function AgentPerformancePage() {
   const [agentes, setAgentes] = useState<Array<{ id: string; nombre: string; email: string }>>([]);
-  const [llamadas, setLlamadas] = useState<Llamada[]>([]);
+  const [statsBackend, setStatsBackend] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+
   useEffect(() => {
-    Promise.all([api.agentes(), api.llamadas()])
-      .then(([agentesData, llamadasData]) => {
+    Promise.all([api.agentes(), api.agenteStats()])
+      .then(([agentesData, statsData]) => {
         setAgentes(agentesData);
-        setLlamadas(llamadasData);
+        setStatsBackend(statsData);
       })
       .catch((err: unknown) => {
         setError(err instanceof Error ? err.message : "Error al cargar datos analíticos");
@@ -33,56 +34,33 @@ export default function AgentPerformancePage() {
   }, []);
 
   const metricasPorAgente = useMemo<AgentStats[]>(() => {
-    if (agentes.length === 0 && llamadas.length === 0) return [];
+    if (agentes.length === 0 && statsBackend.length === 0) return [];
 
-    const statsMap = new Map<string, AgentStats>();
+    return statsBackend.map((stat: any) => {
+      // Find agent name
+      const agent = agentes.find(a => a.id === stat.agenteId);
+      const nombre = agent ? agent.nombre : "Agente Desconocido";
 
-    agentes.forEach((agente) => {
-      statsMap.set(agente.id, {
-        id: agente.id,
-        nombre: agente.nombre,
-        totalEmitidas: 0,
-        totalNoContesta: 0,
-        intentosCortos: 0,
-        indiceAnomalia: 0,
-      });
-    });
-
-    llamadas.forEach((llamada) => {
-      let stats = statsMap.get(llamada.usuarioId);
+      const totalEmitidas = stat.totalLlamadas || 0;
+      const totalNoContesta = stat.noContesta || 0;
+      const intentosCortos = stat.llamadasCortas || 0;
       
-      if (!stats) {
-        stats = {
-          id: llamada.usuarioId,
-          nombre: "Supervisor / Admin (Testing)",
-          totalEmitidas: 0,
-          totalNoContesta: 0,
-          intentosCortos: 0,
-          indiceAnomalia: 0,
-        };
-        statsMap.set(llamada.usuarioId, stats);
+      let indiceAnomalia = 0;
+      if (totalNoContesta > 0) {
+        indiceAnomalia = (intentosCortos / totalNoContesta) * 100;
       }
 
-      stats.totalEmitidas++;
+      return {
+        id: stat.agenteId,
+        nombre,
+        totalEmitidas,
+        totalNoContesta,
+        intentosCortos,
+        indiceAnomalia,
+      };
+    }).sort((a, b) => b.indiceAnomalia - a.indiceAnomalia);
 
-      if (llamada.resultado === "NO_CONTACTADO" || llamada.resultado === "CONTACTADO_NO_EFECTIVO") {
-        stats.totalNoContesta++;
-        
-        // Detección de "Llamada Fantasma" paramétrica < 15 segs
-        if (llamada.duracion !== null && llamada.duracion < 15) {
-          stats.intentosCortos++;
-        }
-      }
-    });
-
-    return Array.from(statsMap.values()).map((stats) => {
-      if (stats.totalNoContesta > 0) {
-        stats.indiceAnomalia = (stats.intentosCortos / stats.totalNoContesta) * 100;
-      }
-      return stats;
-    }).sort((a, b) => b.indiceAnomalia - a.indiceAnomalia); 
-
-  }, [agentes, llamadas]);
+  }, [agentes, statsBackend]);
 
   const getRowStyles = (indice: number, totalNoContesta: number) => {
     if (totalNoContesta === 0) return "bg-white text-slate-700";

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { UploadCloud, CheckCircle, AlertCircle, Loader2, Download } from "lucide-react";
-import { api, type Contacto } from "@/lib/api";
+import { api, type Contacto, type Proyecto } from "@/lib/api";
 
 interface UploadCSVProps {
   onSuccess: () => void;
@@ -13,10 +13,23 @@ export function UploadCSV({ onSuccess }: UploadCSVProps) {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  const [proyectos, setProyectos] = useState<Proyecto[]>([]);
+  const [proyectoId, setProyectoId] = useState<string>("");
+
+  useEffect(() => {
+    api.proyectos().then(setProyectos).catch(console.error);
+  }, []);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    if (!proyectoId) {
+      setError("Debe seleccionar un proyecto antes de subir contactos.");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -60,13 +73,14 @@ export function UploadCSV({ onSuccess }: UploadCSVProps) {
           estado: "PENDIENTE",
           intentos: 0,
           fechaCreacion: Date.now(),
+          proyectoId: proyectoId
         });
       }
 
       if (nuevosContactos.length === 0) throw new Error("No se encontraron contactos válidos.");
 
       // 3. Upload to backend
-      const res = await api.uploadContactos(nuevosContactos);
+      const res = await api.uploadContactos(nuevosContactos, proyectoId);
       setSuccess(`¡Éxito! Se importaron ${res.cantidad} contactos.`);
       
       // Cleanup
@@ -112,6 +126,20 @@ export function UploadCSV({ onSuccess }: UploadCSVProps) {
         </button>
       </div>
 
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-slate-700 mb-1">Proyecto Destino *</label>
+        <select 
+          className="w-full sm:w-1/2 p-2 border border-slate-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+          value={proyectoId}
+          onChange={(e) => setProyectoId(e.target.value)}
+        >
+          <option value="">Seleccione un proyecto...</option>
+          {proyectos.map(p => (
+            <option key={p.id} value={p.id}>{p.nombre}</option>
+          ))}
+        </select>
+      </div>
+
       {error && (
         <div className="flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-sm mb-4">
           <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
@@ -126,13 +154,13 @@ export function UploadCSV({ onSuccess }: UploadCSVProps) {
         </div>
       )}
 
-      <div className="relative border-2 border-dashed border-slate-300 rounded-xl hover:bg-slate-50 transition-colors">
+      <div className={`relative border-2 border-dashed rounded-xl transition-colors ${proyectoId ? 'border-slate-300 hover:bg-slate-50' : 'border-slate-200 bg-slate-50 opacity-60'}`}>
         <input
           ref={fileInputRef}
           type="file"
           accept=".csv"
           onChange={handleFileUpload}
-          disabled={loading}
+          disabled={loading || !proyectoId}
           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
         />
         <div className="flex flex-col items-center justify-center p-8 pointer-events-none">
@@ -142,7 +170,7 @@ export function UploadCSV({ onSuccess }: UploadCSVProps) {
             <UploadCloud className="w-8 h-8 text-slate-400 mb-2" />
           )}
           <span className="text-sm font-medium text-slate-700">
-            {loading ? "Procesando..." : "Haz clic o arrastra un archivo CSV"}
+            {loading ? "Procesando..." : (!proyectoId ? "Selecciona un proyecto primero" : "Haz clic o arrastra un archivo CSV")}
           </span>
         </div>
       </div>

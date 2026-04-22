@@ -38,7 +38,7 @@ function IntentosDots({ intentos }: { intentos: number }) {
   );
 }
 
-export function ContactosTable({ contactos }: { contactos: Contacto[] }) {
+export function ContactosTable({ contactos, proyectos }: { contactos: Contacto[], proyectos?: import("@/lib/api").Proyecto[] }) {
   if (contactos.length === 0) {
     return (
       <div className="flex items-center justify-center py-12 text-muted-foreground text-sm">
@@ -47,12 +47,19 @@ export function ContactosTable({ contactos }: { contactos: Contacto[] }) {
     );
   }
 
+  const getProjectName = (id?: string) => {
+    if (!id || !proyectos) return "N/A";
+    const p = proyectos.find(p => p.id === id);
+    return p ? p.nombre : "N/A";
+  };
+
   return (
     <Table>
       <TableHeader>
         <TableRow>
           <TableHead>Nombre</TableHead>
           <TableHead>Teléfono</TableHead>
+          <TableHead>Proyecto</TableHead>
           <TableHead>Estado</TableHead>
           <TableHead>Intentos</TableHead>
         </TableRow>
@@ -64,6 +71,7 @@ export function ContactosTable({ contactos }: { contactos: Contacto[] }) {
             <TableRow key={c.id} className="hover:bg-slate-50 transition-colors">
               <TableCell className="font-medium">{c.nombre}</TableCell>
               <TableCell className="font-mono text-sm text-slate-600">{c.telefono}</TableCell>
+              <TableCell className="text-sm text-slate-500">{getProjectName(c.proyectoId)}</TableCell>
               <TableCell>
                 <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${badge.bg} ${badge.text}`}>
                   {badge.label}

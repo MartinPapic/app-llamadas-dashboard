@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { api, type Contacto } from "@/lib/api";
+import { api, type Contacto, type Proyecto } from "@/lib/api";
 import { ContactosTable } from "@/components/ContactosTable";
 import { UploadCSV } from "@/components/UploadCSV";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +9,8 @@ import { Loader2 } from "lucide-react";
 
 export default function ContactosPage() {
   const [contactos, setContactos] = useState<Contacto[]>([]);
+  const [proyectos, setProyectos] = useState<Proyecto[]>([]);
+  const [filtroProyecto, setFiltroProyecto] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -24,12 +26,17 @@ export default function ContactosPage() {
 
   useEffect(() => {
     fetchContactos();
+    api.proyectos().then(setProyectos).catch(console.error);
   }, []);
 
-  const pendientes  = contactos.filter((c) => c.estado === "PENDIENTE").length;
-  const enGestion   = contactos.filter((c) => c.estado === "EN_GESTION").length;
-  const contactados = contactos.filter((c) => c.estado === "CONTACTADO").length;
-  const desistidos  = contactos.filter((c) => c.estado === "DESISTIDO").length;
+  const contactosFiltrados = filtroProyecto 
+    ? contactos.filter(c => c.proyectoId === filtroProyecto)
+    : contactos;
+
+  const pendientes  = contactosFiltrados.filter((c) => c.estado === "PENDIENTE").length;
+  const enGestion   = contactosFiltrados.filter((c) => c.estado === "EN_GESTION").length;
+  const contactados = contactosFiltrados.filter((c) => c.estado === "CONTACTADO").length;
+  const desistidos  = contactosFiltrados.filter((c) => c.estado === "DESISTIDO").length;
 
   return (
     <div className="space-y-6">
@@ -73,11 +80,21 @@ export default function ContactosPage() {
           </div>
 
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-base">Lista de contactos</CardTitle>
+              <select 
+                className="text-sm p-1.5 border border-slate-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                value={filtroProyecto}
+                onChange={(e) => setFiltroProyecto(e.target.value)}
+              >
+                <option value="">Todos los proyectos</option>
+                {proyectos.map(p => (
+                  <option key={p.id} value={p.id}>{p.nombre}</option>
+                ))}
+              </select>
             </CardHeader>
             <CardContent>
-              <ContactosTable contactos={contactos} />
+              <ContactosTable contactos={contactosFiltrados} proyectos={proyectos} />
             </CardContent>
           </Card>
         </>
