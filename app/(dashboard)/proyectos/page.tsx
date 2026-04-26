@@ -37,7 +37,7 @@ export default function ProyectosPage() {
     
     setSaving(true);
     try {
-      await api.crearProyecto({ nombre });
+      await api.crearProyecto({ nombre, estado: "ACTIVO" });
       setShowForm(false);
       setNombre("");
       fetchProyectos();
