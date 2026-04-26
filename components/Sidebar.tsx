@@ -12,7 +12,6 @@ const links = [
   { href: "/analytics/funnel", label: "Salud de Base", icon: BarChart3 },
   { href: "/contactos", label: "Directorio", icon: Users },
   { href: "/llamadas",  label: "Historial Crudo",  icon: Phone },
-  { href: "/encuestas", label: "Encuestas", icon: ClipboardCheck },
   { href: "/usuarios",  label: "Agentes",  icon: Users },
 ];
 

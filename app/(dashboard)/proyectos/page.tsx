@@ -15,7 +15,6 @@ export default function ProyectosPage() {
   // Form states
   const [showForm, setShowForm] = useState(false);
   const [nombre, setNombre] = useState("");
-  const [instrumentoUrl, setInstrumentoUrl] = useState("");
   const [saving, setSaving] = useState(false);
 
   const fetchProyectos = () => {
@@ -34,14 +33,13 @@ export default function ProyectosPage() {
 
   const handleCrear = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!nombre.trim() || !instrumentoUrl.trim()) return;
+    if (!nombre.trim()) return;
     
     setSaving(true);
     try {
-      await api.crearProyecto({ nombre, instrumentoUrl });
+      await api.crearProyecto({ nombre });
       setShowForm(false);
       setNombre("");
-      setInstrumentoUrl("");
       fetchProyectos();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al crear proyecto");
@@ -89,23 +87,13 @@ export default function ProyectosPage() {
           </CardHeader>
           <CardContent className="pt-4">
             <form onSubmit={handleCrear} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Nombre del Proyecto</label>
                   <Input 
-                    placeholder="Ej: Encuesta de Satisfacción 2026" 
+                    placeholder="Ej: Campaña de Llamadas 2026" 
                     value={nombre}
                     onChange={(e) => setNombre(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">URL del Instrumento (QuestionPro)</label>
-                  <Input 
-                    placeholder="https://www.questionpro.com/t/..." 
-                    type="url"
-                    value={instrumentoUrl}
-                    onChange={(e) => setInstrumentoUrl(e.target.value)}
                     required
                   />
                 </div>
@@ -145,9 +133,6 @@ export default function ProyectosPage() {
                 </button>
               </CardHeader>
               <CardContent>
-                <div className="text-sm text-slate-500 truncate mb-4" title={proyecto.instrumentoUrl}>
-                  🔗 {proyecto.instrumentoUrl}
-                </div>
                 <div className="text-xs text-slate-400">
                   Creado el: {new Date(proyecto.fechaCreacion).toLocaleDateString()}
                 </div>

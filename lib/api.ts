@@ -26,7 +26,7 @@ export interface FunnelMetrics {
 export interface Proyecto {
   id: string;
   nombre: string;
-  instrumentoUrl: string;
+  estado: "ACTIVO" | "INACTIVO";
   fechaCreacion: number;
 }
 
@@ -55,15 +55,7 @@ export interface Llamada {
   proyectoId?: string;
 }
 
-// Trigger redeploy: Mandatory motive implementation 2026-04-14
 
-export interface Encuesta {
-  id: string;
-  contactoId: string;
-  url: string;
-  estado: "COMPLETA" | "INCOMPLETA" | "NO_REALIZADA";
-  fecha: number;
-}
 
 async function safeFetch<T>(url: string, options?: RequestInit): Promise<T> {
   let res: Response;
@@ -107,23 +99,20 @@ export const api = {
   contactos: (): Promise<Contacto[]> =>
     safeFetch<Contacto[]>(`${BASE}/admin/contacts`),
 
-  encuestas: (): Promise<Encuesta[]> =>
-    safeFetch<Encuesta[]>(`${BASE}/admin/surveys`),
-
   llamadas: (): Promise<Llamada[]> =>
     safeFetch<Llamada[]>(`${BASE}/admin/calls`),
 
   proyectos: (): Promise<Proyecto[]> =>
-    safeFetch<Proyecto[]>(`${BASE}/api/proyectos`),
+    safeFetch<Proyecto[]>(`${BASE}/projects`),
 
   crearProyecto: (p: Omit<Proyecto, "id" | "fechaCreacion">): Promise<Proyecto> =>
-    safeFetch<Proyecto>(`${BASE}/api/proyectos`, {
+    safeFetch<Proyecto>(`${BASE}/projects`, {
       method: "POST",
       body: JSON.stringify(p),
     }),
 
   eliminarProyecto: (id: string): Promise<void> =>
-    safeFetch(`${BASE}/api/proyectos/${id}`, { method: "DELETE" }),
+    safeFetch(`${BASE}/projects/${id}`, { method: "DELETE" }),
 
   crearContacto: (c: Omit<Contacto, "id">): Promise<Contacto> =>
     safeFetch<Contacto>(`${BASE}/admin/contacts`, {
