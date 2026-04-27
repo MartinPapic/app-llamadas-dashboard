@@ -133,4 +133,16 @@ export const api = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(contactos),
     }),
+
+  asignarAgente: (usuarioId: string, proyectoId: string): Promise<unknown> =>
+    safeFetch(`${BASE}/projects/asignar`, {
+      method: "POST",
+      body: JSON.stringify({ usuarioId, proyectoId }),
+    }),
+
+  desasignarAgente: (asignacionId: number): Promise<void> =>
+    safeFetch(`${BASE}/projects/asignaciones/${asignacionId}`, { method: "DELETE" }),
+
+  agentesDeProyecto: (proyectoId: string): Promise<Array<{ asignacionId: number; id: string; nombre: string; email: string }>> =>
+    safeFetch(`${BASE}/projects/${proyectoId}/agentes`),
 };
