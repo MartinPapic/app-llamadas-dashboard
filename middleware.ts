@@ -5,13 +5,31 @@ const PUBLIC_PATHS = ["/login", "/api/auth"];
 
 function isTokenInvalid(token: string): boolean {
   try {
-    const payload = JSON.parse(atob(token.split(".")[1]));
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join("")
+    );
+    
+    const payload = JSON.parse(jsonPayload);
+    
     if (payload.rol?.toUpperCase() !== "ADMIN") {
       return true; // Rol no permitido en dashboard
     }
-    return Date.now() >= payload.exp * 1000;
-  } catch {
-    return true; // Token malformado → tratar como inválido
+    
+    // Margen de 30 segundos para evitar problemas de sincronización de reloj
+    const now = Math.floor(Date.now() / 1000);
+    if (now >= (payload.exp - 30)) {
+      return true; // Expirado o por expirar
+    }
+    
+    return false;
+  } catch (e) {
+    console.error("[Middleware] Error decoding token:", e);
+    return true;
   }
 }
 
