@@ -3,12 +3,64 @@
 import { useEffect, useState } from "react";
 import { api, type RealtimeMetrics } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Activity, PhoneCall, CheckCircle2, XCircle, Clock, SearchX, AlertTriangle, Loader2, Users } from "lucide-react";
+import { Activity, PhoneCall, CheckCircle2, XCircle, Clock, SearchX, AlertTriangle, Loader2, Users, Download } from "lucide-react";
 
 export default function SupervisorRealtimePage() {
   const [metrics, setMetrics] = useState<RealtimeMetrics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [exportando, setExportando] = useState(false);
+
+  const handleExport = async () => {
+    try {
+      setExportando(true);
+      const data = await api.exportarDatos();
+      if (!data || data.length === 0) {
+        alert("No hay datos para exportar.");
+        return;
+      }
+      
+      const headers = [
+        "Llamada ID", "Contacto ID", "Lista ID", "Referencia ID", 
+        "Nombre Contacto", "Teléfono", "Fecha Llamada", "Duración (s)", 
+        "Agente ID", "Email Agente", "Resultado", "Tipificación", 
+        "Motivo", "Observación", "Intento Válido"
+      ];
+      
+      const escapeCsv = (str: string | null | undefined) => {
+        if (!str) return "";
+        return `"${str.replace(/"/g, '""')}"`;
+      };
+
+      const csvContent = [
+        headers.join(","),
+        ...data.map(row => {
+          const date = new Date(row.fechaLlamada).toISOString();
+          return [
+            row.llamadaId, row.contactoId, row.listaId || "", row.referenciaId || "",
+            escapeCsv(row.nombreContacto), escapeCsv(row.telefonoContacto), date, row.duracion || 0,
+            row.agenteId, row.emailAgente, row.resultado || "", escapeCsv(row.tipificacion),
+            escapeCsv(row.motivo), escapeCsv(row.observacion), row.intentoValido ? "Sí" : "No"
+          ].join(",");
+        })
+      ].join("\n");
+      
+      const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", `exportacion_llamadas_${new Date().getTime()}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      console.error(err);
+      alert("Error al exportar los datos.");
+    } finally {
+      setExportando(false);
+    }
+  };
 
   const fetchRealtime = () => {
     api.realtimeMetrics()
@@ -63,6 +115,16 @@ export default function SupervisorRealtimePage() {
         <p className="text-slate-500 mt-2 text-lg">
           Monitoreo de tráfico, contactabilidad y desempeño del Call Center en la jornada actual.
         </p>
+      </div>
+      <div className="flex justify-end">
+        <button
+          onClick={handleExport}
+          disabled={exportando}
+          className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg shadow-sm transition-colors disabled:opacity-50"
+        >
+          {exportando ? <Loader2 className="w-5 h-5 animate-spin" /> : <Download className="w-5 h-5" />}
+          {exportando ? "Exportando..." : "Exportar Bitácora CSV"}
+        </button>
       </div>
 
       {/* KPI Principales */}

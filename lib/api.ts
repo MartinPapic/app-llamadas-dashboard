@@ -66,6 +66,24 @@ export interface Llamada {
   proyectoId?: string;
 }
 
+export interface ExportData {
+  llamadaId: string;
+  contactoId: string;
+  listaId: string | null;
+  referenciaId: string | null;
+  nombreContacto: string;
+  telefonoContacto: string;
+  fechaLlamada: number;
+  duracion: number | null;
+  agenteId: string;
+  emailAgente: string;
+  resultado: string | null;
+  tipificacion: string | null;
+  motivo: string | null;
+  observacion: string | null;
+  intentoValido: boolean;
+}
+
 
 
 async function safeFetch<T>(url: string, options?: RequestInit): Promise<T> {
@@ -109,6 +127,9 @@ export const api = {
 
   funnelMetrics: (): Promise<FunnelMetrics> =>
     safeFetch<FunnelMetrics>(`${BASE}/analytics/funnel`),
+
+  exportarDatos: (proyectoId?: string): Promise<ExportData[]> =>
+    safeFetch<ExportData[]>(`${BASE}/analytics/export${proyectoId ? `?proyectoId=${proyectoId}` : ""}`),
 
   contactos: (): Promise<Contacto[]> =>
     safeFetch<Contacto[]>(`${BASE}/admin/contacts`),

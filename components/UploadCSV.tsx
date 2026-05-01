@@ -75,7 +75,7 @@ export function UploadCSV({ onSuccess }: UploadCSVProps) {
         const columns = lines[i].split(",");
         const nombre = columns[idxNombre]?.trim() || "Sin Nombre";
         const telefono = columns[idxTelefono]?.trim() || "";
-        const referenciaId = idxId !== -1 ? (columns[idxId]?.trim() || null) : null;
+        const referenciaId = idxId !== -1 && columns[idxId]?.trim() ? columns[idxId].trim() : undefined;
 
         if (!telefono) continue; 
 
