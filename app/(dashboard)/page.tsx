@@ -54,18 +54,27 @@ export default function SupervisorRealtimePage() {
         headers.join(","),
         ...data.map(row => {
           return [
-            row.event_id, escapeCsv(row.event_type), row.event_timestamp,
-            escapeCsv(row.record_id), escapeCsv(row.record_phone), escapeCsv(row.record_name),
-            escapeCsv(row.group_id), escapeCsv(row.group_name),
-            escapeCsv(row.sub_group_id), escapeCsv(row.sub_group_name),
-            escapeCsv(row.user_id), escapeCsv(row.user_name),
-            row.attempt_number, row.is_valid_attempt, escapeCsv(row.attempt_date),
-            row.duration_seconds ?? "", row.duration_minutes?.toFixed(2) ?? "",
-            escapeCsv(row.classification), row.is_closing_classification,
-            row.classification_reverted, escapeCsv(row.record_status),
-            escapeCsv(row.closure_reason), row.total_valid_attempts,
-            row.is_blocked, row.is_callable, escapeCsv(row.previous_event_id),
-            escapeCsv(row.action_source), escapeCsv(row.comments)
+            row.event_id || row.eventId, escapeCsv(row.event_type || row.eventType), row.event_timestamp || row.eventTimestamp,
+            escapeCsv(row.record_id || row.recordId), escapeCsv(row.record_phone || row.recordPhone), escapeCsv(row.record_name || row.recordName),
+            escapeCsv(row.group_id || row.groupId), escapeCsv(row.group_name || row.groupName),
+            escapeCsv(row.sub_group_id || row.subGroupId), escapeCsv(row.sub_group_name || row.subGroupName),
+            escapeCsv(row.user_id || row.userId), escapeCsv(row.user_name || row.userName),
+            row.attempt_number ?? row.attemptNumber ?? "",
+            row.is_valid_attempt ?? row.validAttempt ?? row.isValidAttempt ?? "",
+            escapeCsv(row.attempt_date || row.attemptDate),
+            row.duration_seconds ?? row.durationSeconds ?? "",
+            (row.duration_minutes ?? row.durationMinutes)?.toFixed(2) ?? "",
+            escapeCsv(row.classification),
+            row.is_closing_classification ?? row.closingClassification ?? row.isClosingClassification ?? "",
+            row.classification_reverted ?? row.classificationReverted ?? "",
+            escapeCsv(row.record_status || row.recordStatus),
+            escapeCsv(row.closure_reason || row.closureReason),
+            row.total_valid_attempts ?? row.totalValidAttempts ?? "",
+            row.is_blocked ?? row.isBlocked ?? "",
+            row.is_callable ?? row.isCallable ?? "",
+            escapeCsv(row.previous_event_id || row.previousEventId),
+            escapeCsv(row.action_source || row.actionSource),
+            escapeCsv(row.comments)
           ].join(",");
         })
       ].join("\n");
