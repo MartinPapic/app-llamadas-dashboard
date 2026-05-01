@@ -5,10 +5,12 @@ const BASE = "/api/proxy";
 export interface Metricas {
   totalContactos: number;
   totalLlamadas: number;
+  totalLlamadasValidas: number;
   totalContestan: number;
   totalNoContestan: number;
   duracionPromedio: number;
   tasaContacto: number;
+  distribucionTipificaciones: Record<string, number>;
 }
 
 export interface RealtimeMetrics {
@@ -122,14 +124,21 @@ export const api = {
   metricas: (proyectoId?: string): Promise<Metricas> =>
     safeFetch<Metricas>(`${BASE}/metrics${proyectoId ? `?proyectoId=${proyectoId}` : ""}`),
 
-  realtimeMetrics: (): Promise<RealtimeMetrics> =>
-    safeFetch<RealtimeMetrics>(`${BASE}/analytics/realtime`),
+  realtimeMetrics: (proyectoId?: string): Promise<RealtimeMetrics> =>
+    safeFetch<RealtimeMetrics>(`${BASE}/analytics/realtime${proyectoId ? `?proyectoId=${proyectoId}` : ""}`),
 
   funnelMetrics: (): Promise<FunnelMetrics> =>
     safeFetch<FunnelMetrics>(`${BASE}/analytics/funnel`),
 
-  exportarDatos: (proyectoId?: string): Promise<ExportData[]> =>
-    safeFetch<ExportData[]>(`${BASE}/analytics/export${proyectoId ? `?proyectoId=${proyectoId}` : ""}`),
+  exportarDatos: (filtros?: { proyectoId?: string; agenteId?: string; fechaInicio?: string; fechaFin?: string }): Promise<ExportData[]> => {
+    const params = new URLSearchParams();
+    if (filtros?.proyectoId) params.append("proyectoId", filtros.proyectoId);
+    if (filtros?.agenteId) params.append("agenteId", filtros.agenteId);
+    if (filtros?.fechaInicio) params.append("fechaInicio", filtros.fechaInicio);
+    if (filtros?.fechaFin) params.append("fechaFin", filtros.fechaFin);
+    const qs = params.toString();
+    return safeFetch<ExportData[]>(`${BASE}/analytics/export${qs ? `?${qs}` : ""}`);
+  },
 
   contactos: (): Promise<Contacto[]> =>
     safeFetch<Contacto[]>(`${BASE}/admin/contacts`),

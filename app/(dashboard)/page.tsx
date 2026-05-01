@@ -1,20 +1,33 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { api, type RealtimeMetrics } from "@/lib/api";
+import { api, type RealtimeMetrics, type Proyecto } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Activity, PhoneCall, CheckCircle2, XCircle, Clock, SearchX, AlertTriangle, Loader2, Users, Download } from "lucide-react";
 
 export default function SupervisorRealtimePage() {
   const [metrics, setMetrics] = useState<RealtimeMetrics | null>(null);
+  const [proyectos, setProyectos] = useState<Proyecto[]>([]);
+  const [agentes, setAgentes] = useState<Array<{ id: string; nombre: string; email: string }>>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [exportando, setExportando] = useState(false);
 
+  const [selectedProyecto, setSelectedProyecto] = useState<string>("");
+  const [selectedAgente, setSelectedAgente] = useState<string>("");
+  const [fechaInicio, setFechaInicio] = useState<string>("");
+  const [fechaFin, setFechaFin] = useState<string>("");
+
   const handleExport = async () => {
     try {
       setExportando(true);
-      const data = await api.exportarDatos();
+      const filtros = {
+        proyectoId: selectedProyecto || undefined,
+        agenteId: selectedAgente || undefined,
+        fechaInicio: fechaInicio || undefined,
+        fechaFin: fechaFin || undefined
+      };
+      const data = await api.exportarDatos(filtros);
       if (!data || data.length === 0) {
         alert("No hay datos para exportar.");
         return;
@@ -63,20 +76,31 @@ export default function SupervisorRealtimePage() {
   };
 
   const fetchRealtime = () => {
-    api.realtimeMetrics()
+    api.realtimeMetrics(selectedProyecto || undefined)
       .then(setMetrics)
       .catch((err: unknown) => {
         setError(err instanceof Error ? err.message : "Error al obtener métricas en vivo");
-      })
-      .finally(() => setLoading(false));
+      });
   };
 
   useEffect(() => {
-    fetchRealtime();
-    // Refrescar cada 15 segundos simulando "tiempo real"
+    setLoading(true);
+    Promise.all([api.proyectos(), api.agentes(), api.realtimeMetrics(selectedProyecto || undefined)])
+      .then(([proyectosData, agentesData, metricsData]) => {
+        setProyectos(proyectosData);
+        setAgentes(agentesData);
+        setMetrics(metricsData);
+      })
+      .catch((err: unknown) => {
+        setError(err instanceof Error ? err.message : "Error al obtener datos");
+      })
+      .finally(() => setLoading(false));
+  }, [selectedProyecto]);
+
+  useEffect(() => {
     const interval = setInterval(fetchRealtime, 15000);
     return () => clearInterval(interval);
-  }, []);
+  }, [selectedProyecto]);
 
   if (loading && !metrics) {
     return (
@@ -113,17 +137,63 @@ export default function SupervisorRealtimePage() {
           Control Operativo (En Vivo)
         </h1>
         <p className="text-slate-500 mt-2 text-lg">
-          Monitoreo de tráfico, contactabilidad y desempeño del Call Center en la jornada actual.
+          Monitoreo de tráfico, contactabilidad y desempeño del Call Center.
         </p>
       </div>
-      <div className="flex justify-end">
+
+      {/* Filtros */}
+      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-wrap gap-4 items-end">
+        <div className="flex-1 min-w-[200px]">
+          <label className="block text-sm font-medium text-slate-700 mb-1">Proyecto</label>
+          <select
+            className="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-indigo-500"
+            value={selectedProyecto}
+            onChange={(e) => setSelectedProyecto(e.target.value)}
+          >
+            <option value="">Todos los proyectos</option>
+            {proyectos.map((p) => (
+              <option key={p.id} value={p.id}>{p.nombre}</option>
+            ))}
+          </select>
+        </div>
+        <div className="flex-1 min-w-[200px]">
+          <label className="block text-sm font-medium text-slate-700 mb-1">Agente (Exportación)</label>
+          <select
+            className="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-indigo-500"
+            value={selectedAgente}
+            onChange={(e) => setSelectedAgente(e.target.value)}
+          >
+            <option value="">Todos los agentes</option>
+            {agentes.map((a) => (
+              <option key={a.id} value={a.id}>{a.nombre}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">Desde</label>
+          <input
+            type="date"
+            className="border border-slate-300 rounded-lg p-2 text-sm focus:ring-indigo-500"
+            value={fechaInicio}
+            onChange={(e) => setFechaInicio(e.target.value)}
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">Hasta</label>
+          <input
+            type="date"
+            className="border border-slate-300 rounded-lg p-2 text-sm focus:ring-indigo-500"
+            value={fechaFin}
+            onChange={(e) => setFechaFin(e.target.value)}
+          />
+        </div>
         <button
           onClick={handleExport}
           disabled={exportando}
-          className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg shadow-sm transition-colors disabled:opacity-50"
+          className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-6 rounded-lg shadow-sm transition-colors disabled:opacity-50 ml-auto h-10"
         >
-          {exportando ? <Loader2 className="w-5 h-5 animate-spin" /> : <Download className="w-5 h-5" />}
-          {exportando ? "Exportando..." : "Exportar Bitácora CSV"}
+          {exportando ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+          Exportar CSV
         </button>
       </div>
 
