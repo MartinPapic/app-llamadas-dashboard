@@ -34,10 +34,15 @@ export default function SupervisorRealtimePage() {
       }
       
       const headers = [
-        "Llamada ID", "Contacto ID", "Lista ID", "Referencia ID", 
-        "Nombre Contacto", "Teléfono", "Fecha Llamada", "Duración (s)", 
-        "Agente ID", "Email Agente", "Resultado", "Tipificación", 
-        "Motivo", "Observación", "Intento Válido"
+        "event_id", "event_type", "event_timestamp", "record_id",
+        "record_phone", "record_name", "group_id", "group_name",
+        "sub_group_id", "sub_group_name", "user_id", "user_name",
+        "attempt_number", "is_valid_attempt", "attempt_date",
+        "duration_seconds", "duration_minutes", "classification",
+        "is_closing_classification", "classification_reverted",
+        "record_status", "closure_reason", "total_valid_attempts",
+        "is_blocked", "is_callable", "previous_event_id",
+        "action_source", "comments"
       ];
       
       const escapeCsv = (str: string | null | undefined) => {
@@ -48,12 +53,19 @@ export default function SupervisorRealtimePage() {
       const csvContent = [
         headers.join(","),
         ...data.map(row => {
-          const date = new Date(row.fechaLlamada).toISOString();
           return [
-            row.llamadaId, row.contactoId, row.listaId || "", row.referenciaId || "",
-            escapeCsv(row.nombreContacto), escapeCsv(row.telefonoContacto), date, row.duracion || 0,
-            row.agenteId, row.emailAgente, row.resultado || "", escapeCsv(row.tipificacion),
-            escapeCsv(row.motivo), escapeCsv(row.observacion), row.intentoValido ? "Sí" : "No"
+            row.event_id, escapeCsv(row.event_type), row.event_timestamp,
+            escapeCsv(row.record_id), escapeCsv(row.record_phone), escapeCsv(row.record_name),
+            escapeCsv(row.group_id), escapeCsv(row.group_name),
+            escapeCsv(row.sub_group_id), escapeCsv(row.sub_group_name),
+            escapeCsv(row.user_id), escapeCsv(row.user_name),
+            row.attempt_number, row.is_valid_attempt, escapeCsv(row.attempt_date),
+            row.duration_seconds ?? "", row.duration_minutes?.toFixed(2) ?? "",
+            escapeCsv(row.classification), row.is_closing_classification,
+            row.classification_reverted, escapeCsv(row.record_status),
+            escapeCsv(row.closure_reason), row.total_valid_attempts,
+            row.is_blocked, row.is_callable, escapeCsv(row.previous_event_id),
+            escapeCsv(row.action_source), escapeCsv(row.comments)
           ].join(",");
         })
       ].join("\n");

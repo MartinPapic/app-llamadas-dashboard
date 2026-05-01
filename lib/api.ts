@@ -69,21 +69,34 @@ export interface Llamada {
 }
 
 export interface ExportData {
-  llamadaId: string;
-  contactoId: string;
-  listaId: string | null;
-  referenciaId: string | null;
-  nombreContacto: string;
-  telefonoContacto: string;
-  fechaLlamada: number;
-  duracion: number | null;
-  agenteId: string;
-  emailAgente: string;
-  resultado: string | null;
-  tipificacion: string | null;
-  motivo: string | null;
-  observacion: string | null;
-  intentoValido: boolean;
+  event_id: string;
+  event_type: string;
+  event_timestamp: number;
+  record_id: string;
+  record_phone: string;
+  record_name: string;
+  group_id: string | null;
+  group_name: string | null;
+  sub_group_id: string | null;
+  sub_group_name: string | null;
+  user_id: string;
+  user_name: string;
+  attempt_number: number;
+  is_valid_attempt: boolean;
+  attempt_date: string;
+  duration_seconds: number | null;
+  duration_minutes: number | null;
+  classification: string | null;
+  is_closing_classification: boolean;
+  classification_reverted: boolean;
+  record_status: string;
+  closure_reason: string | null;
+  total_valid_attempts: number;
+  is_blocked: boolean;
+  is_callable: boolean;
+  previous_event_id: string | null;
+  action_source: string;
+  comments: string | null;
 }
 
 
