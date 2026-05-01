@@ -83,7 +83,10 @@ async function safeFetch<T>(url: string, options?: RequestInit): Promise<T> {
   }
 
   if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
-  return res.json() as Promise<T>;
+  if (res.status === 204) return null as unknown as T;
+  
+  const text = await res.text();
+  return text ? JSON.parse(text) as T : (null as unknown as T);
 }
 
 export const api = {
