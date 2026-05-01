@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { api, type Llamada } from "@/lib/api";
+import { api, type Llamada, type Proyecto } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { PieChart, Clock, AlertTriangle, CheckCircle2, Loader2, Users } from "lucide-react";
 
@@ -16,22 +16,25 @@ interface AgentStats {
 
 export default function AgentPerformancePage() {
   const [agentes, setAgentes] = useState<Array<{ id: string; nombre: string; email: string }>>([]);
+  const [proyectos, setProyectos] = useState<Proyecto[]>([]);
+  const [selectedProyecto, setSelectedProyecto] = useState<string>("");
   const [statsBackend, setStatsBackend] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-
   useEffect(() => {
-    Promise.all([api.agentes(), api.agenteStats()])
-      .then(([agentesData, statsData]) => {
+    setLoading(true);
+    Promise.all([api.agentes(), api.proyectos(), api.agenteStats(selectedProyecto)])
+      .then(([agentesData, proyectosData, statsData]) => {
         setAgentes(agentesData);
+        setProyectos(proyectosData);
         setStatsBackend(statsData);
       })
       .catch((err: unknown) => {
         setError(err instanceof Error ? err.message : "Error al cargar datos analíticos");
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [selectedProyecto]);
 
   const metricasPorAgente = useMemo<AgentStats[]>(() => {
     if (agentes.length === 0 && statsBackend.length === 0) return [];
@@ -110,11 +113,24 @@ export default function AgentPerformancePage() {
       </div>
 
       <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden mt-8">
-        <div className="p-5 bg-slate-50 border-b border-slate-200">
+        <div className="p-5 bg-slate-50 border-b border-slate-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <h2 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
             <Clock className="w-5 h-5 text-indigo-500" />
             Reporte de Calidad por Agente
           </h2>
+          <div className="flex items-center gap-2">
+            <label className="text-sm font-medium text-slate-600">Filtrar por Proyecto:</label>
+            <select
+              className="px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              value={selectedProyecto}
+              onChange={(e) => setSelectedProyecto(e.target.value)}
+            >
+              <option value="">Todos los Proyectos</option>
+              {proyectos.map(p => (
+                <option key={p.id} value={p.id}>{p.nombre}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <div className="overflow-x-auto">

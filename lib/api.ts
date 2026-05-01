@@ -159,8 +159,8 @@ export const api = {
   agentes: (): Promise<Array<{ id: string; nombre: string; email: string }>> =>
     safeFetch(`${BASE}/admin/agents`),
 
-  agenteStats: (): Promise<any[]> =>
-    safeFetch(`${BASE}/analytics/agents`),
+  agenteStats: (proyectoId?: string): Promise<any[]> =>
+    safeFetch(`${BASE}/analytics/agents${proyectoId ? `?proyectoId=${proyectoId}` : ""}`),
 
   uploadContactos: (contactos: Contacto[], proyectoId?: string, listaId?: string): Promise<{ mensaje: string; cantidad: number }> => {
     const params = new URLSearchParams();
