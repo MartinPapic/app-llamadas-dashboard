@@ -52,7 +52,8 @@ export default function SupervisorRealtimePage() {
 
       const csvContent = [
         headers.join(","),
-        ...data.map(row => {
+        ...data.map(r => {
+          const row = r as any;
           return [
             row.event_id || row.eventId, escapeCsv(row.event_type || row.eventType), row.event_timestamp || row.eventTimestamp,
             escapeCsv(row.record_id || row.recordId), escapeCsv(row.record_phone || row.recordPhone), escapeCsv(row.record_name || row.recordName),
