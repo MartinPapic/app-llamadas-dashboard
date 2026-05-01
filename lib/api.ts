@@ -30,15 +30,26 @@ export interface Proyecto {
   fechaCreacion: number;
 }
 
+export interface Lista {
+  id: string;
+  nombre: string;
+  proyectoId: string;
+  fechaCreacion: number;
+  estado: string;
+}
+
 export interface Contacto {
   id: string;
   nombre: string;
   telefono: string;
-  estado: "PENDIENTE" | "EN_GESTION" | "CONTACTADO" | "DESISTIDO";
+  estado: "PENDIENTE" | "EN_GESTION" | "CONTACTADO" | "DESISTIDO" | "CERRADO" | "CERRADO_POR_INTENTOS";
   intentos: number;
+  intentosValidos: number;
   fechaCreacion: number;
   agenteId?: string;
   proyectoId?: string;
+  listaId?: string;
+  referenciaId?: string;
 }
 
 export interface Llamada {
@@ -130,12 +141,17 @@ export const api = {
   agenteStats: (): Promise<any[]> =>
     safeFetch(`${BASE}/analytics/agents`),
 
-  uploadContactos: (contactos: Contacto[], proyectoId?: string): Promise<{ mensaje: string; cantidad: number }> =>
-    safeFetch(`${BASE}/admin/contacts/upload${proyectoId ? `?proyectoId=${proyectoId}` : ""}`, {
+  uploadContactos: (contactos: Contacto[], proyectoId?: string, listaId?: string): Promise<{ mensaje: string; cantidad: number }> => {
+    const params = new URLSearchParams();
+    if (proyectoId) params.append("proyectoId", proyectoId);
+    if (listaId) params.append("listaId", listaId);
+    const qs = params.toString() ? `?${params.toString()}` : "";
+    return safeFetch(`${BASE}/admin/contacts/upload${qs}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(contactos),
-    }),
+    });
+  },
 
   asignarAgente: (usuarioId: string, proyectoId: string): Promise<unknown> =>
     safeFetch(`${BASE}/projects/asignar`, {
@@ -148,4 +164,29 @@ export const api = {
 
   agentesDeProyecto: (proyectoId: string): Promise<Array<{ asignacionId: number; id: string; nombre: string; email: string }>> =>
     safeFetch(`${BASE}/projects/${proyectoId}/agentes`),
+
+  // Listas
+  listasDeProyecto: (proyectoId: string): Promise<Lista[]> =>
+    safeFetch(`${BASE}/listas/proyecto/${proyectoId}`),
+
+  crearLista: (lista: Omit<Lista, "id" | "fechaCreacion" | "estado">): Promise<Lista> =>
+    safeFetch(`${BASE}/listas`, {
+      method: "POST",
+      body: JSON.stringify(lista),
+    }),
+
+  eliminarLista: (id: string): Promise<void> =>
+    safeFetch(`${BASE}/listas/${id}`, { method: "DELETE" }),
+
+  asignarAgenteLista: (usuarioId: string, listaId: string): Promise<unknown> =>
+    safeFetch(`${BASE}/listas/asignar`, {
+      method: "POST",
+      body: JSON.stringify({ usuarioId, listaId }),
+    }),
+
+  desasignarAgenteLista: (asignacionId: number): Promise<void> =>
+    safeFetch(`${BASE}/listas/asignaciones/${asignacionId}`, { method: "DELETE" }),
+
+  agentesDeLista: (listaId: string): Promise<Array<{ asignacionId: number; id: string; nombre: string; email: string }>> =>
+    safeFetch(`${BASE}/listas/${listaId}/agentes`),
 };
