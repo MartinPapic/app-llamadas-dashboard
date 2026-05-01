@@ -41,6 +41,10 @@ async function proxyRequest(
       console.log(`[Proxy] El backend devolvió 403 para backendPath=${backendPath}, URL completa=${targetUrl}`);
     }
 
+    if (backendRes.status === 204) {
+      return new NextResponse(null, { status: 204 });
+    }
+
     const data = await backendRes.json().catch(() => ({}));
     return NextResponse.json(data, { status: backendRes.status });
   } catch (err: any) {
