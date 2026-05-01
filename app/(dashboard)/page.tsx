@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { api, type RealtimeMetrics } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Activity, PhoneCall, CheckCircle2, XCircle, Clock, SearchX, AlertTriangle, Loader2 } from "lucide-react";
+import { Activity, PhoneCall, CheckCircle2, XCircle, Clock, SearchX, AlertTriangle, Loader2, Users } from "lucide-react";
 
 export default function SupervisorRealtimePage() {
   const [metrics, setMetrics] = useState<RealtimeMetrics | null>(null);
@@ -125,6 +125,14 @@ export default function SupervisorRealtimePage() {
             <XCircle className="w-10 h-10 text-rose-500 mb-3" />
             <div className="text-3xl font-bold text-slate-800">{noContesta}</div>
             <p className="text-sm font-medium text-rose-600 mt-1">No Contestan</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white border-slate-200 shadow-sm">
+          <CardContent className="pt-6 flex flex-col items-center text-center">
+            <Users className="w-10 h-10 text-indigo-500 mb-3" />
+            <div className="text-3xl font-bold text-slate-800">{m.totalAgentesActivos || 0}</div>
+            <p className="text-sm font-medium text-indigo-600 mt-1">Agentes Activos</p>
           </CardContent>
         </Card>
 
