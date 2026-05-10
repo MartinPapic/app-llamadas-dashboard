@@ -9,15 +9,22 @@ export default function FunnelPage() {
   const [metrics, setMetrics] = useState<FunnelMetrics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [proyectos, setProyectos] = useState<any[]>([]);
+  const [selectedProyecto, setSelectedProyecto] = useState<string>("");
 
   useEffect(() => {
-    api.funnelMetrics()
+    api.proyectos().then(setProyectos).catch(console.error);
+  }, []);
+
+  useEffect(() => {
+    setLoading(true);
+    api.funnelMetrics(selectedProyecto || undefined)
       .then(setMetrics)
       .catch((err: unknown) => {
         setError(err instanceof Error ? err.message : "Error al cargar el embudo de campaña");
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [selectedProyecto]);
 
   if (loading && !metrics) {
     return (
@@ -60,6 +67,21 @@ export default function FunnelPage() {
         <p className="text-slate-500 mt-2 text-lg">
           Auditoría de saturación de base de datos y conversión efectiva hasta el cierre de encuestas.
         </p>
+      </div>
+
+      {/* Filtro de Proyecto */}
+      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3 w-full max-w-md">
+        <label className="text-sm font-medium text-slate-700 shrink-0">Filtrar por Proyecto:</label>
+        <select
+          className="flex-1 border border-slate-300 rounded-lg p-2 text-sm focus:ring-indigo-500"
+          value={selectedProyecto}
+          onChange={(e) => setSelectedProyecto(e.target.value)}
+        >
+          <option value="">Todos los proyectos</option>
+          {proyectos.map((p: any) => (
+            <option key={p.id} value={p.id}>{p.nombre}</option>
+          ))}
+        </select>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

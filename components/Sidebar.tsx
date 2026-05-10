@@ -8,6 +8,7 @@ import { logout } from "@/lib/auth";
 const links = [
   { href: "/",          label: "Supervisor (En vivo)", icon: LayoutDashboard },
   { href: "/proyectos", label: "Proyectos", icon: Briefcase },
+  { href: "/analytics/global", label: "Rendimiento", icon: BarChart3 },
   { href: "/analytics/agents", label: "Productividad", icon: BarChart3 },
   { href: "/analytics/funnel", label: "Salud de Base", icon: BarChart3 },
   { href: "/contactos", label: "Directorio", icon: Users },

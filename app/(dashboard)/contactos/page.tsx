@@ -94,7 +94,7 @@ export default function ContactosPage() {
               </select>
             </CardHeader>
             <CardContent>
-              <ContactosTable contactos={contactosFiltrados} proyectos={proyectos} />
+              <ContactosTable contactos={contactosFiltrados} proyectos={proyectos} onRefresh={fetchContactos} />
             </CardContent>
           </Card>
         </>

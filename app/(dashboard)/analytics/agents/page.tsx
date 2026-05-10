@@ -12,6 +12,8 @@ interface AgentStats {
   totalNoContesta: number;
   intentosCortos: number; // Anomalías (< 15s)
   indiceAnomalia: number; // Porcentaje
+  totalEfectivos: number;
+  tasaEfectividad: number;
 }
 
 export default function AgentPerformancePage() {
@@ -47,6 +49,8 @@ export default function AgentPerformancePage() {
       const totalEmitidas = stat.totalLlamadas || 0;
       const totalNoContesta = stat.noContesta || 0;
       const intentosCortos = stat.llamadasCortas || 0;
+      const totalEfectivos = stat.efectivos || 0;
+      const tasaEfectividad = stat.tasaEfectividad || 0;
       
       let indiceAnomalia = 0;
       if (totalNoContesta > 0) {
@@ -60,8 +64,10 @@ export default function AgentPerformancePage() {
         totalNoContesta,
         intentosCortos,
         indiceAnomalia,
+        totalEfectivos,
+        tasaEfectividad,
       };
-    }).sort((a, b) => b.indiceAnomalia - a.indiceAnomalia);
+    }).sort((a, b) => b.tasaEfectividad - a.tasaEfectividad); // Updated default sorting
 
   }, [agentes, statsBackend]);
 
@@ -138,10 +144,12 @@ export default function AgentPerformancePage() {
             <thead>
               <tr className="bg-slate-100 text-slate-600 text-sm border-b border-slate-200">
                 <th className="py-4 px-6 font-semibold w-1/4">Agente</th>
-                <th className="py-4 px-6 font-semibold text-right">Llamadas Emitidas</th>
-                <th className="py-4 px-6 font-semibold text-right">Mala Calidad / Fallidas</th>
-                <th className="py-4 px-6 font-semibold text-right text-rose-800">Fraude Corto (&lt; 15s)</th>
-                <th className="py-4 px-6 font-semibold text-right">Índice de Anomalía</th>
+                <th className="py-4 px-6 font-semibold text-right">Emitidas</th>
+                <th className="py-4 px-6 font-semibold text-right text-emerald-700">Efectivas</th>
+                <th className="py-4 px-6 font-semibold text-right text-emerald-700">% Efectividad</th>
+                <th className="py-4 px-6 font-semibold text-right">Fallidas / No Contesta</th>
+                <th className="py-4 px-6 font-semibold text-right text-rose-800">Anomalías (&lt; 15s)</th>
+                <th className="py-4 px-6 font-semibold text-right">Índice Anomalía</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -157,6 +165,12 @@ export default function AgentPerformancePage() {
                     </td>
                     <td className="py-4 px-6 text-right font-medium opacity-80">
                       {operador.totalEmitidas}
+                    </td>
+                    <td className="py-4 px-6 text-right font-bold text-emerald-700">
+                      {operador.totalEfectivos}
+                    </td>
+                    <td className="py-4 px-6 text-right font-bold">
+                      {operador.tasaEfectividad.toFixed(1)}%
                     </td>
                     <td className="py-4 px-6 text-right font-medium opacity-80">
                       {operador.totalNoContesta}

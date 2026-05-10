@@ -140,8 +140,8 @@ export const api = {
   realtimeMetrics: (proyectoId?: string): Promise<RealtimeMetrics> =>
     safeFetch<RealtimeMetrics>(`${BASE}/analytics/realtime${proyectoId ? `?proyectoId=${proyectoId}` : ""}`),
 
-  funnelMetrics: (): Promise<FunnelMetrics> =>
-    safeFetch<FunnelMetrics>(`${BASE}/analytics/funnel`),
+  funnelMetrics: (proyectoId?: string): Promise<FunnelMetrics> =>
+    safeFetch<FunnelMetrics>(`${BASE}/analytics/funnel${proyectoId ? `?proyectoId=${proyectoId}` : ""}`),
 
   exportarDatos: (filtros?: { proyectoId?: string; agenteId?: string; fechaInicio?: string; fechaFin?: string }): Promise<ExportData[]> => {
     const params = new URLSearchParams();
@@ -232,4 +232,7 @@ export const api = {
 
   agentesDeLista: (listaId: string): Promise<Array<{ asignacionId: number; id: string; nombre: string; email: string }>> =>
     safeFetch(`${BASE}/listas/${listaId}/agentes`),
+
+  desbloquearContacto: (id: string): Promise<{ success: boolean }> =>
+    safeFetch(`${BASE}/contacts/${id}/unlock`, { method: "POST" }),
 };

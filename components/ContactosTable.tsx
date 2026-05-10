@@ -6,13 +6,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Contacto } from "@/lib/api";
+import { Button } from "@/components/ui/button";
+import { Unlock, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { Contacto, api } from "@/lib/api";
 
 const estadoBadge: Record<string, { bg: string; text: string; label: string }> = {
   PENDIENTE:  { bg: "bg-yellow-100", text: "text-yellow-800", label: "Pendiente" },
   EN_GESTION: { bg: "bg-blue-100",   text: "text-blue-800",   label: "En gestión" },
   CONTACTADO: { bg: "bg-green-100",  text: "text-green-800",  label: "Contactado" },
   DESISTIDO:  { bg: "bg-red-100",    text: "text-red-800",    label: "Desistido" },
+  CERRADO_POR_INTENTOS: { bg: "bg-orange-100", text: "text-orange-800", label: "Max. Intentos" },
 };
 
 function IntentosDots({ intentos }: { intentos: number }) {
@@ -38,7 +42,23 @@ function IntentosDots({ intentos }: { intentos: number }) {
   );
 }
 
-export function ContactosTable({ contactos, proyectos }: { contactos: Contacto[], proyectos?: import("@/lib/api").Proyecto[] }) {
+export function ContactosTable({ contactos, proyectos, onRefresh }: { contactos: Contacto[], proyectos?: import("@/lib/api").Proyecto[], onRefresh?: () => void }) {
+  const [unlockingId, setUnlockingId] = useState<string | null>(null);
+
+  const handleUnlock = async (id: string) => {
+    if (!confirm("¿Estás seguro de que deseas reiniciar este contacto? Se borrarán sus intentos.")) return;
+    try {
+      setUnlockingId(id);
+      await api.desbloquearContacto(id);
+      alert("Contacto reiniciado con éxito.");
+      if (onRefresh) onRefresh();
+    } catch (err) {
+      alert("Error al desbloquear el contacto.");
+      console.error(err);
+    } finally {
+      setUnlockingId(null);
+    }
+  };
   if (contactos.length === 0) {
     return (
       <div className="flex items-center justify-center py-12 text-muted-foreground text-sm">
@@ -62,11 +82,14 @@ export function ContactosTable({ contactos, proyectos }: { contactos: Contacto[]
           <TableHead>Proyecto</TableHead>
           <TableHead>Estado</TableHead>
           <TableHead>Intentos</TableHead>
+          <TableHead className="text-right">Acciones</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {contactos.map((c) => {
           const badge = estadoBadge[c.estado] ?? { bg: "bg-slate-100", text: "text-slate-700", label: c.estado };
+          const canUnlock = c.intentos >= 5 || c.estado === "CERRADO_POR_INTENTOS" || c.intentosValidos >= 5;
+          
           return (
             <TableRow key={c.id} className="hover:bg-slate-50 transition-colors">
               <TableCell className="font-medium">{c.nombre}</TableCell>
@@ -78,7 +101,21 @@ export function ContactosTable({ contactos, proyectos }: { contactos: Contacto[]
                 </span>
               </TableCell>
               <TableCell>
-                <IntentosDots intentos={c.intentos} />
+                <IntentosDots intentos={c.intentosValidos ?? c.intentos} />
+              </TableCell>
+              <TableCell className="text-right">
+                {canUnlock && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => handleUnlock(c.id)}
+                    disabled={unlockingId === c.id}
+                    className="text-orange-600 hover:bg-orange-50 hover:text-orange-700 h-8 px-2"
+                  >
+                    {unlockingId === c.id ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" /> : <Unlock className="w-3.5 h-3.5 mr-1" />}
+                    Reiniciar
+                  </Button>
+                )}
               </TableCell>
             </TableRow>
           );
