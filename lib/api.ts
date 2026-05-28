@@ -11,6 +11,7 @@ export interface Metricas {
   duracionPromedio: number;
   tasaContacto: number;
   distribucionTipificaciones: Record<string, number>;
+  totalGestionExitosa: number;
 }
 
 export interface RealtimeMetrics {
@@ -18,6 +19,7 @@ export interface RealtimeMetrics {
   llamadasEmitidasHoy: number;
   tasaContactabilidadDiaria: number;
   distribucionResultados: Record<string, number>;
+  gestionExitosaHoy?: number;
 }
 
 export interface FunnelMetrics {
@@ -38,6 +40,7 @@ export interface Lista {
   proyectoId: string;
   fechaCreacion: number;
   estado: string;
+  maxGestionExitosa?: number | null;
 }
 
 export interface Contacto {

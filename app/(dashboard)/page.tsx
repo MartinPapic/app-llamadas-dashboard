@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { api, type RealtimeMetrics, type Proyecto } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Activity, PhoneCall, CheckCircle2, XCircle, Clock, SearchX, AlertTriangle, Loader2, Users, Download } from "lucide-react";
+import { Activity, PhoneCall, CheckCircle2, XCircle, Clock, SearchX, AlertTriangle, Loader2, Users, Download, Award } from "lucide-react";
 
 export default function SupervisorRealtimePage() {
   const [metrics, setMetrics] = useState<RealtimeMetrics | null>(null);
@@ -256,13 +256,21 @@ export default function SupervisorRealtimePage() {
 
       {/* Distribución de Resultados */}
       <h2 className="text-xl font-bold text-slate-800 mt-10 mb-4 border-b pb-2">Distribución de Tráfico (Estados de Llamada)</h2>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         
         <Card className="bg-white border-slate-200 shadow-sm">
           <CardContent className="pt-6 flex flex-col items-center text-center">
             <CheckCircle2 className="w-10 h-10 text-emerald-500 mb-3" />
             <div className="text-3xl font-bold text-slate-800">{contesta}</div>
             <p className="text-sm font-medium text-emerald-600 mt-1">Efectivas</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-indigo-50 border-indigo-100 shadow-sm">
+          <CardContent className="pt-6 flex flex-col items-center text-center">
+            <Award className="w-10 h-10 text-indigo-600 mb-3" />
+            <div className="text-3xl font-bold text-indigo-950">{m.gestionExitosaHoy || 0}</div>
+            <p className="text-sm font-semibold text-indigo-700 mt-1">Gestiones Exitosas</p>
           </CardContent>
         </Card>
         

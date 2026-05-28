@@ -77,7 +77,7 @@ export default function GlobalPerformancePage() {
       </div>
 
       {/* Top Indicators */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         
         {/* KPI: Tasa Contacto Efectivo */}
         <Card className="bg-gradient-to-br from-emerald-600 to-teal-700 text-white shadow-lg border-none">
@@ -91,6 +91,21 @@ export default function GlobalPerformancePage() {
           </CardHeader>
           <CardContent>
             <p className="text-emerald-50 text-sm opacity-90">De todas las llamadas con intentos válidos.</p>
+          </CardContent>
+        </Card>
+
+        {/* KPI: Gestiones Exitosas */}
+        <Card className="bg-gradient-to-br from-indigo-600 to-violet-700 text-white shadow-lg border-none">
+          <CardHeader className="pb-2">
+            <CardDescription className="text-indigo-100 font-semibold uppercase tracking-wider text-xs flex items-center gap-1">
+              <ShieldCheck className="w-4 h-4"/> Gestiones Exitosas
+            </CardDescription>
+            <CardTitle className="text-5xl font-extrabold tracking-tight">
+              {(m.totalGestionExitosa || 0).toLocaleString()}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-indigo-50 text-sm opacity-90">Encuestas completadas con éxito.</p>
           </CardContent>
         </Card>
 

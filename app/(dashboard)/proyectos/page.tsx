@@ -28,6 +28,7 @@ export default function ProyectosPage() {
   
   // Crear lista
   const [nuevaListaNombre, setNuevaListaNombre] = useState<Record<string, string>>({});
+  const [nuevaListaTope, setNuevaListaTope] = useState<Record<string, string>>({});
 
   // Panel de asignación por lista
   const [expandedList, setExpandedList] = useState<string | null>(null);
@@ -93,11 +94,21 @@ export default function ProyectosPage() {
 
   const handleCrearLista = async (proyectoId: string) => {
     const listName = nuevaListaNombre[proyectoId];
+    const listTopeStr = nuevaListaTope[proyectoId];
     if (!listName?.trim()) return;
+    
+    const maxVal = listTopeStr?.trim() ? parseInt(listTopeStr, 10) : null;
+    const maxGestionExitosa = maxVal !== null && !isNaN(maxVal) ? maxVal : null;
+
     try {
-      const nueva = await api.crearLista({ nombre: listName, proyectoId });
+      const nueva = await api.crearLista({ 
+        nombre: listName, 
+        proyectoId, 
+        maxGestionExitosa 
+      });
       setListas(prev => ({ ...prev, [proyectoId]: [...(prev[proyectoId] || []), nueva] }));
       setNuevaListaNombre(prev => ({ ...prev, [proyectoId]: "" }));
+      setNuevaListaTope(prev => ({ ...prev, [proyectoId]: "" }));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al crear lista");
     }
@@ -113,6 +124,25 @@ export default function ProyectosPage() {
       }));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al eliminar lista");
+    }
+  };
+
+  const handleActualizarTope = async (lista: Lista, maxGestionExitosa: number | null) => {
+    try {
+      const actualizada = await api.crearLista({
+        ...lista,
+        maxGestionExitosa
+      });
+      setListas(prev => {
+        const proyectoId = lista.proyectoId;
+        return {
+          ...prev,
+          [proyectoId]: prev[proyectoId].map(l => l.id === lista.id ? actualizada : l)
+        };
+      });
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al actualizar tope de lista");
     }
   };
 
@@ -255,14 +285,22 @@ export default function ProyectosPage() {
                 {isProjectOpen && (
                   <CardContent className="pt-2 border-t border-slate-100 bg-slate-50/50">
                     {/* Crear nueva lista */}
-                    <div className="flex gap-2 mb-4">
+                    <div className="flex gap-2 mb-4 items-center">
                       <Input 
                         placeholder="Nombre de la nueva lista..." 
                         value={nuevaListaNombre[proyecto.id] ?? ""}
                         onChange={e => setNuevaListaNombre(prev => ({ ...prev, [proyecto.id]: e.target.value }))}
-                        className="bg-white text-sm"
+                        className="bg-white text-sm flex-[2]"
                       />
-                      <Button onClick={() => handleCrearLista(proyecto.id)} size="sm" className="bg-indigo-600 hover:bg-indigo-700">
+                      <Input 
+                        type="number"
+                        placeholder="Tope G. Exitosa (opcional)" 
+                        value={nuevaListaTope[proyecto.id] ?? ""}
+                        onChange={e => setNuevaListaTope(prev => ({ ...prev, [proyecto.id]: e.target.value }))}
+                        className="bg-white text-sm flex-[1]"
+                        min="1"
+                      />
+                      <Button onClick={() => handleCrearLista(proyecto.id)} size="sm" className="bg-indigo-600 hover:bg-indigo-700 shrink-0">
                         <Plus className="w-4 h-4 mr-2"/> Añadir Lista
                       </Button>
                     </div>
@@ -282,8 +320,32 @@ export default function ProyectosPage() {
                           return (
                             <div key={lista.id} className="bg-white border border-slate-200 rounded-lg p-3">
                               <div className="flex items-center justify-between mb-2">
-                                <div>
-                                  <h4 className="font-semibold text-slate-800 text-sm">{lista.nombre}</h4>
+                                <div className="flex items-center gap-3 flex-wrap">
+                                  <h4 className="font-semibold text-slate-800 text-sm">
+                                    {lista.nombre}
+                                  </h4>
+                                  <div className="flex items-center gap-1.5" title="Establecer límite de gestiones exitosas. Presiona Enter o haz clic fuera para guardar.">
+                                    <span className="text-[10px] text-slate-400 font-medium shrink-0 bg-slate-100 px-1.5 py-0.5 rounded">Tope:</span>
+                                    <Input
+                                      type="number"
+                                      placeholder="Sin tope"
+                                      className="w-16 h-6 text-[10px] bg-slate-50 border-slate-200 px-1 text-center shrink-0 font-medium"
+                                      defaultValue={lista.maxGestionExitosa ?? ""}
+                                      onBlur={async (e) => {
+                                        const val = e.target.value.trim();
+                                        const maxVal = val ? parseInt(val, 10) : null;
+                                        const maxGestionExitosa = maxVal !== null && !isNaN(maxVal) ? maxVal : null;
+                                        if (maxGestionExitosa !== lista.maxGestionExitosa) {
+                                          await handleActualizarTope(lista, maxGestionExitosa);
+                                        }
+                                      }}
+                                      onKeyDown={async (e) => {
+                                        if (e.key === "Enter") {
+                                          e.currentTarget.blur();
+                                        }
+                                      }}
+                                    />
+                                  </div>
                                 </div>
                                 <div className="flex gap-3">
                                   <button onClick={() => toggleLista(lista.id)} className="text-indigo-600 text-sm font-medium hover:underline flex items-center gap-1">

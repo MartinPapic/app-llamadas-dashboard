@@ -14,6 +14,7 @@ interface AgentStats {
   indiceAnomalia: number; // Porcentaje
   totalEfectivos: number;
   tasaEfectividad: number;
+  totalGestionExitosa: number;
 }
 
 export default function AgentPerformancePage() {
@@ -51,6 +52,7 @@ export default function AgentPerformancePage() {
       const intentosCortos = stat.llamadasCortas || 0;
       const totalEfectivos = stat.efectivos || 0;
       const tasaEfectividad = stat.tasaEfectividad || 0;
+      const totalGestionExitosa = stat.gestionExitosa || 0;
       
       let indiceAnomalia = 0;
       if (totalNoContesta > 0) {
@@ -66,6 +68,7 @@ export default function AgentPerformancePage() {
         indiceAnomalia,
         totalEfectivos,
         tasaEfectividad,
+        totalGestionExitosa,
       };
     }).sort((a, b) => b.tasaEfectividad - a.tasaEfectividad); // Updated default sorting
 
@@ -146,6 +149,7 @@ export default function AgentPerformancePage() {
                 <th className="py-4 px-6 font-semibold w-1/4">Agente</th>
                 <th className="py-4 px-6 font-semibold text-right">Emitidas</th>
                 <th className="py-4 px-6 font-semibold text-right text-emerald-700">Efectivas</th>
+                <th className="py-4 px-6 font-semibold text-right text-indigo-700">Gestiones Exitosas</th>
                 <th className="py-4 px-6 font-semibold text-right text-emerald-700">% Efectividad</th>
                 <th className="py-4 px-6 font-semibold text-right">Fallidas / No Contesta</th>
                 <th className="py-4 px-6 font-semibold text-right text-rose-800">Anomalías (&lt; 15s)</th>
@@ -158,7 +162,7 @@ export default function AgentPerformancePage() {
                 const badgeStyles = getBadgeColors(operador.indiceAnomalia, operador.totalNoContesta);
 
                 return (
-                  <tr key={operador.id} className={`transition-colors ${styles}`}>
+                   <tr key={operador.id} className={`transition-colors ${styles}`}>
                     <td className="py-4 px-6">
                       <div className="font-medium">{operador.nombre}</div>
                       <div className="text-xs opacity-70 truncate max-w-[150px]" title={operador.id}>ID: ...{operador.id.slice(-6)}</div>
@@ -168,6 +172,9 @@ export default function AgentPerformancePage() {
                     </td>
                     <td className="py-4 px-6 text-right font-bold text-emerald-700">
                       {operador.totalEfectivos}
+                    </td>
+                    <td className="py-4 px-6 text-right font-bold text-indigo-700">
+                      {operador.totalGestionExitosa}
                     </td>
                     <td className="py-4 px-6 text-right font-bold">
                       {operador.tasaEfectividad.toFixed(1)}%
