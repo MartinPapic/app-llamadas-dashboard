@@ -42,10 +42,7 @@ export default function GlobalPerformancePage() {
     );
   }
 
-  const m = metrics!;
-
-  // Format the tipification breakdown for display, sorted highest volume first
-  const tipificacionesFormatted = Object.entries(m.distribucionTipificaciones || {})
+  const tipificacionesFormatted = Object.entries(metrics?.distribucionTipificaciones || {})
     .map(([nombre, porcentaje]) => ({ nombre, porcentaje }))
     .sort((a, b) => b.porcentaje - a.porcentaje);
 
@@ -86,7 +83,7 @@ export default function GlobalPerformancePage() {
               <ShieldCheck className="w-4 h-4"/> % Contactabilidad Efectiva
             </CardDescription>
             <CardTitle className="text-5xl font-extrabold tracking-tight">
-              {m.tasaContacto.toFixed(1)}%
+              {Number(metrics?.tasaContacto || 0).toFixed(1)}%
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -101,7 +98,7 @@ export default function GlobalPerformancePage() {
               <ShieldCheck className="w-4 h-4"/> Gestiones Exitosas
             </CardDescription>
             <CardTitle className="text-5xl font-extrabold tracking-tight">
-              {(m.totalGestionExitosa || 0).toLocaleString()}
+              {Number(metrics?.totalGestionExitosa || 0).toLocaleString()}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -112,11 +109,11 @@ export default function GlobalPerformancePage() {
         <Card className="bg-white border-slate-200 shadow-sm">
           <CardHeader className="pb-2">
             <CardDescription className="text-slate-500 font-semibold text-xs uppercase">Llamadas Emitidas</CardDescription>
-            <CardTitle className="text-3xl text-slate-800">{m.totalLlamadasValidas.toLocaleString()}</CardTitle>
+            <CardTitle className="text-3xl text-slate-800">{Number(metrics?.totalLlamadasValidas || 0).toLocaleString()}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-xs text-slate-500 mt-1">
-              <span className="font-bold text-indigo-600">{m.totalContestan}</span> atendieron la llamada
+              <span className="font-bold text-indigo-600">{metrics?.totalContestan || 0}</span> atendieron la llamada
             </div>
           </CardContent>
         </Card>
@@ -124,7 +121,7 @@ export default function GlobalPerformancePage() {
         <Card className="bg-white border-slate-200 shadow-sm">
           <CardHeader className="pb-2">
             <CardDescription className="text-slate-500 font-semibold text-xs uppercase">Tiempo Promedio Hablado</CardDescription>
-            <CardTitle className="text-3xl text-slate-800">{m.duracionPromedio.toFixed(0)}s</CardTitle>
+            <CardTitle className="text-3xl text-slate-800">{Number(metrics?.duracionPromedio || 0).toFixed(0)}s</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-slate-500 text-xs">Segundos reales de conversación detectada por llamada.</p>
@@ -178,7 +175,7 @@ export default function GlobalPerformancePage() {
               
               <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold">
-                   {(m.totalLlamadasValidas > 0 ? (m.totalContestan / m.totalLlamadasValidas * 100) : 0).toFixed(0)}%
+                   {(Number(metrics?.totalLlamadasValidas || 0) > 0 ? (Number(metrics?.totalContestan || 0) / Number(metrics?.totalLlamadasValidas || 1) * 100) : 0).toFixed(0)}%
                 </div>
                 <div>
                   <div className="text-sm font-bold text-slate-800">Atención Efectiva (RPC)</div>
@@ -188,17 +185,17 @@ export default function GlobalPerformancePage() {
 
               <div className="pt-2">
                  <div className="flex justify-between text-xs font-semibold text-slate-500 mb-2 px-1">
-                   <span>Contestan ({m.totalContestan})</span>
-                   <span>No Contestan ({m.totalNoContestan})</span>
+                   <span>Contestan ({metrics?.totalContestan || 0})</span>
+                   <span>No Contestan ({metrics?.totalNoContestan || 0})</span>
                  </div>
                  <div className="w-full flex h-10 rounded-xl overflow-hidden border border-white shadow-sm">
                     <div className="bg-emerald-500 flex items-center justify-center text-white font-bold text-sm h-full" 
-                         style={{ width: `${m.totalLlamadasValidas > 0 ? (m.totalContestan / m.totalLlamadasValidas * 100) : 50}%` }}>
-                         {m.totalLlamadasValidas > 0 ? (m.totalContestan / m.totalLlamadasValidas * 100).toFixed(0) : "-"}%
+                         style={{ width: `${Number(metrics?.totalLlamadasValidas || 0) > 0 ? (Number(metrics?.totalContestan || 0) / Number(metrics?.totalLlamadasValidas || 1) * 100) : 50}%` }}>
+                         {Number(metrics?.totalLlamadasValidas || 0) > 0 ? (Number(metrics?.totalContestan || 0) / Number(metrics?.totalLlamadasValidas || 1) * 100).toFixed(0) : "-"}%
                     </div>
                     <div className="bg-rose-500 flex items-center justify-center text-white font-bold text-sm h-full" 
-                         style={{ width: `${m.totalLlamadasValidas > 0 ? (m.totalNoContestan / m.totalLlamadasValidas * 100) : 50}%` }}>
-                         {m.totalLlamadasValidas > 0 ? (m.totalNoContestan / m.totalLlamadasValidas * 100).toFixed(0) : "-"}%
+                         style={{ width: `${Number(metrics?.totalLlamadasValidas || 0) > 0 ? (Number(metrics?.totalNoContestan || 0) / Number(metrics?.totalLlamadasValidas || 1) * 100) : 50}%` }}>
+                         {Number(metrics?.totalLlamadasValidas || 0) > 0 ? (Number(metrics?.totalNoContestan || 0) / Number(metrics?.totalLlamadasValidas || 1) * 100).toFixed(0) : "-"}%
                     </div>
                  </div>
               </div>

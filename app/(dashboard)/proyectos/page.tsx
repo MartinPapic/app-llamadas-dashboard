@@ -256,7 +256,7 @@ export default function ProyectosPage() {
         </div>
       ) : (
         <div className="space-y-4">
-          {proyectos.map((proyecto) => {
+          {(proyectos || []).map((proyecto) => {
             const isProjectOpen = expandedProject === proyecto.id;
             const projectLists = listas[proyecto.id] ?? [];
 
@@ -405,7 +405,7 @@ export default function ProyectosPage() {
             );
           })}
 
-          {proyectos.length === 0 && !showForm && (
+          {(!proyectos || proyectos.length === 0) && !showForm && (
             <div className="py-12 text-center text-slate-500 bg-slate-50 rounded-lg border border-dashed border-slate-200">
               No hay proyectos creados.
             </div>

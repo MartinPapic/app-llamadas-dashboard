@@ -42,7 +42,7 @@ export default function AgentPerformancePage() {
   const metricasPorAgente = useMemo<AgentStats[]>(() => {
     if (agentes.length === 0 && statsBackend.length === 0) return [];
 
-    return statsBackend.map((stat: any) => {
+    return (statsBackend || []).map((stat: any) => {
       // Find agent name
       const agent = agentes.find(a => a.id === stat.agenteId);
       const nombre = agent ? agent.nombre : "Agente Desconocido";
@@ -135,7 +135,7 @@ export default function AgentPerformancePage() {
               onChange={(e) => setSelectedProyecto(e.target.value)}
             >
               <option value="">Todos los Proyectos</option>
-              {proyectos.map(p => (
+              {(proyectos || []).map(p => (
                 <option key={p.id} value={p.id}>{p.nombre}</option>
               ))}
             </select>
@@ -157,7 +157,7 @@ export default function AgentPerformancePage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {metricasPorAgente.map((operador) => {
+              {(metricasPorAgente || []).map((operador) => {
                 const styles = getRowStyles(operador.indiceAnomalia, operador.totalNoContesta);
                 const badgeStyles = getBadgeColors(operador.indiceAnomalia, operador.totalNoContesta);
 
