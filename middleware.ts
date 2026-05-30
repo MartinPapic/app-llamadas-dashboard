@@ -6,7 +6,13 @@ const PUBLIC_PATHS = ["/login", "/api/auth"];
 function isTokenInvalid(token: string): boolean {
   try {
     const base64Url = token.split(".")[1];
-    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    let base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    
+    // Add padding to prevent atob DOMException in Edge Runtime
+    while (base64.length % 4) {
+      base64 += "=";
+    }
+    
     const jsonPayload = decodeURIComponent(
       atob(base64)
         .split("")
