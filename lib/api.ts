@@ -102,7 +102,13 @@ export interface ExportData {
   comments: string | null;
 }
 
-
+export interface PaginatedResponse<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;
+}
 
 async function safeFetch<T>(url: string, options?: RequestInit): Promise<T> {
   let res: Response;
@@ -156,8 +162,11 @@ export const api = {
     return safeFetch<ExportData[]>(`${BASE}/analytics/export${qs ? `?${qs}` : ""}`);
   },
 
-  contactos: (): Promise<Contacto[]> =>
-    safeFetch<Contacto[]>(`${BASE}/admin/contacts`),
+  contactos: (page = 0, size = 100, proyectoId?: string): Promise<PaginatedResponse<Contacto>> => {
+    const params = new URLSearchParams({ page: page.toString(), size: size.toString() });
+    if (proyectoId) params.append("proyectoId", proyectoId);
+    return safeFetch<PaginatedResponse<Contacto>>(`${BASE}/admin/contacts?${params.toString()}`);
+  },
 
   llamadas: (): Promise<Llamada[]> =>
     safeFetch<Llamada[]>(`${BASE}/admin/calls`),

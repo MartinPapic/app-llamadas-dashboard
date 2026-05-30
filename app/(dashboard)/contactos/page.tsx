@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { api, type Contacto, type Proyecto } from "@/lib/api";
+import { api, type Contacto, type Proyecto, type FunnelMetrics } from "@/lib/api";
 import { ContactosTable } from "@/components/ContactosTable";
 import { UploadCSV } from "@/components/UploadCSV";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,35 +14,49 @@ export default function ContactosPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Paginación y Métricas Globales
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
+  const [funnel, setFunnel] = useState<FunnelMetrics | null>(null);
+
   const fetchContactos = () => {
     setLoading(true);
-    api.contactos()
-      .then(setContactos)
+    api.contactos(page, 100, filtroProyecto || undefined)
+      .then((res) => {
+        setContactos(res.content);
+        setTotalPages(res.totalPages);
+        setTotalElements(res.totalElements);
+      })
       .catch((err: unknown) =>
         setError(err instanceof Error ? err.message : "Error al cargar contactos")
       )
       .finally(() => setLoading(false));
+      
+    // Obtener los contadores exactos de la base de datos completa
+    api.funnelMetrics(filtroProyecto || undefined)
+      .then(setFunnel)
+      .catch(console.error);
   };
 
   useEffect(() => {
     fetchContactos();
+  }, [page, filtroProyecto]);
+
+  useEffect(() => {
     api.proyectos().then(setProyectos).catch(console.error);
   }, []);
 
-  const contactosFiltrados = filtroProyecto 
-    ? contactos.filter(c => c.proyectoId === filtroProyecto)
-    : contactos;
-
-  const pendientes  = contactosFiltrados.filter((c) => c.estado === "PENDIENTE").length;
-  const enGestion   = contactosFiltrados.filter((c) => c.estado === "EN_GESTION").length;
-  const contactados = contactosFiltrados.filter((c) => c.estado === "CONTACTADO").length;
-  const desistidos  = contactosFiltrados.filter((c) => c.estado === "DESISTIDO").length;
+  const pendientes  = funnel?.estados["PENDIENTE"] || 0;
+  const enGestion   = funnel?.estados["EN_GESTION"] || 0;
+  const contactados = funnel?.estados["CONTACTADO"] || 0;
+  const desistidos  = funnel?.estados["DESISTIDO"] || 0;
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-slate-800">
-          Directorio {!loading && `(${contactos.length})`}
+          Directorio {!loading && `(${totalElements} registros)`}
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
           Bolsa de trabajo global. Los contactos subidos aquí están disponibles para que cualquier agente los tome en tiempo real.
@@ -55,14 +69,14 @@ export default function ContactosPage() {
         </div>
       )}
 
-      {loading ? (
+      {loading && contactos.length === 0 ? (
         <div className="flex items-center justify-center py-20">
           <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
         </div>
       ) : (
         <>
           {/* Upload Component */}
-          <UploadCSV onSuccess={fetchContactos} />
+          <UploadCSV onSuccess={() => { setPage(0); fetchContactos(); }} />
 
           {/* Resumen rápido */}
           <div className="grid grid-cols-4 gap-3">
@@ -85,7 +99,10 @@ export default function ContactosPage() {
               <select 
                 className="text-sm p-1.5 border border-slate-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                 value={filtroProyecto}
-                onChange={(e) => setFiltroProyecto(e.target.value)}
+                onChange={(e) => {
+                  setFiltroProyecto(e.target.value);
+                  setPage(0); // Reset page on filter change
+                }}
               >
                 <option value="">Todos los proyectos</option>
                 {proyectos.map(p => (
@@ -94,7 +111,31 @@ export default function ContactosPage() {
               </select>
             </CardHeader>
             <CardContent>
-              <ContactosTable contactos={contactosFiltrados} proyectos={proyectos} onRefresh={fetchContactos} />
+              {loading && <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10 rounded-b-lg"><Loader2 className="w-6 h-6 animate-spin text-indigo-500"/></div>}
+              <ContactosTable contactos={contactos} proyectos={proyectos} onRefresh={fetchContactos} />
+              
+              {/* Paginación */}
+              <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-100">
+                <span className="text-sm text-slate-500">
+                  Página {totalPages === 0 ? 0 : page + 1} de {totalPages}
+                </span>
+                <div className="flex gap-2">
+                  <button 
+                    disabled={page === 0 || loading}
+                    onClick={() => setPage(p => Math.max(0, p - 1))}
+                    className="px-3 py-1 text-sm border border-slate-300 rounded-md bg-white hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Anterior
+                  </button>
+                  <button 
+                    disabled={page >= totalPages - 1 || loading}
+                    onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
+                    className="px-3 py-1 text-sm border border-slate-300 rounded-md bg-white hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Siguiente
+                  </button>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </>
