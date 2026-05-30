@@ -57,7 +57,10 @@ export function UploadCSV({ onSuccess }: UploadCSVProps) {
       
       if (lines.length < 2) throw new Error("El archivo está vacío o no tiene encabezados.");
 
-      const headers = lines[0].toLowerCase().split(",");
+      // Detect separator
+      const separator = lines[0].includes(";") ? ";" : ",";
+
+      const headers = lines[0].toLowerCase().split(separator);
       const expectedHeaders = ["nombre", "telefono"];
       
       const missing = expectedHeaders.filter(h => !headers.includes(h));
@@ -72,7 +75,7 @@ export function UploadCSV({ onSuccess }: UploadCSVProps) {
       const nuevosContactos: Contacto[] = [];
 
       for (let i = 1; i < lines.length; i++) {
-        const columns = lines[i].split(",");
+        const columns = lines[i].split(separator);
         const nombre = columns[idxNombre]?.trim() || "Sin Nombre";
         const telefono = columns[idxTelefono]?.trim() || "";
         const referenciaId = idxId !== -1 && columns[idxId]?.trim() ? columns[idxId].trim() : undefined;
