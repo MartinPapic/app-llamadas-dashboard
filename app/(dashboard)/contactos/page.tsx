@@ -51,6 +51,8 @@ export default function ContactosPage() {
   const enGestion   = funnel?.estados["EN_GESTION"] || 0;
   const contactados = funnel?.estados["CONTACTADO"] || 0;
   const desistidos  = funnel?.estados["DESISTIDO"] || 0;
+  const cerrados    = funnel?.estados["CERRADO"] || 0;
+  const cerradosMax = funnel?.estados["CERRADO_POR_INTENTOS"] || 0;
 
   return (
     <div className="space-y-6">
@@ -79,12 +81,14 @@ export default function ContactosPage() {
           <UploadCSV onSuccess={() => { setPage(0); fetchContactos(); }} />
 
           {/* Resumen rápido */}
-          <div className="grid grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
             {[
               { label: "Pendientes",  count: pendientes,  color: "bg-yellow-100 text-yellow-800" },
               { label: "En gestión",  count: enGestion,   color: "bg-blue-100 text-blue-800" },
               { label: "Contactados", count: contactados, color: "bg-green-100 text-green-800" },
               { label: "Desistidos",  count: desistidos,  color: "bg-red-100 text-red-800" },
+              { label: "Cerrados",    count: cerrados,    color: "bg-slate-200 text-slate-800" },
+              { label: "Max Intentos",count: cerradosMax, color: "bg-orange-100 text-orange-800" },
             ].map(({ label, count, color }) => (
               <div key={label} className={`rounded-lg px-4 py-3 text-center ${color}`}>
                 <div className="text-2xl font-bold">{count}</div>
