@@ -24,14 +24,23 @@ function formatDuracion(seg: number | null): string {
 
 export default function LlamadasPage() {
   const [llamadas, setLlamadas] = useState<Llamada[]>([]);
+  const [agentesMap, setAgentesMap] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.llamadas()
-      .then(setLlamadas)
+    Promise.all([api.llamadas(), api.agentes()])
+      .then(([llamadasData, agentesData]) => {
+        setLlamadas(llamadasData);
+        
+        const map: Record<string, string> = {};
+        agentesData.forEach(a => {
+          map[a.id] = a.nombre;
+        });
+        setAgentesMap(map);
+      })
       .catch((err: unknown) =>
-        setError(err instanceof Error ? err.message : "Error al cargar llamadas")
+        setError(err instanceof Error ? err.message : "Error al cargar datos")
       )
       .finally(() => setLoading(false));
   }, []);
@@ -87,7 +96,9 @@ export default function LlamadasPage() {
                     const res = resultadoStyle[l.resultado ?? ""] ?? null;
                     return (
                       <TableRow key={l.id} className="hover:bg-slate-50 transition-colors">
-                        <TableCell className="font-medium text-sm">{l.usuarioId}</TableCell>
+                        <TableCell className="font-medium text-sm" title={l.usuarioId}>
+                          {agentesMap[l.usuarioId] || l.usuarioId}
+                        </TableCell>
                         <TableCell className="text-sm text-slate-500 whitespace-nowrap">
                           {format(new Date(l.fechaInicio), "dd/MM/yyyy HH:mm", { locale: es })}
                         </TableCell>
