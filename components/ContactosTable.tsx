@@ -88,7 +88,7 @@ export function ContactosTable({ contactos, proyectos, onRefresh }: { contactos:
       <TableBody>
         {contactos.map((c) => {
           const badge = estadoBadge[c.estado] ?? { bg: "bg-slate-100", text: "text-slate-700", label: c.estado };
-          const canUnlock = c.intentos >= 5 || c.estado === "CERRADO_POR_INTENTOS" || c.intentosValidos >= 5;
+          const canUnlock = c.estado === "CERRADO_POR_INTENTOS" || c.estado === "CERRADO" || c.estado === "DESISTIDO" || c.intentos >= 5 || (c.intentosValidos ?? 0) >= 5;
           
           return (
             <TableRow key={c.id} className="hover:bg-slate-50 transition-colors">
