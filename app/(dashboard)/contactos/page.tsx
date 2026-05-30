@@ -11,6 +11,7 @@ export default function ContactosPage() {
   const [contactos, setContactos] = useState<Contacto[]>([]);
   const [proyectos, setProyectos] = useState<Proyecto[]>([]);
   const [filtroProyecto, setFiltroProyecto] = useState<string>("");
+  const [filtroEstado, setFiltroEstado] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -22,7 +23,7 @@ export default function ContactosPage() {
 
   const fetchContactos = () => {
     setLoading(true);
-    api.contactos(page, 100, filtroProyecto || undefined)
+    api.contactos(page, 100, filtroProyecto || undefined, filtroEstado || undefined)
       .then((res) => {
         setContactos(res.content);
         setTotalPages(res.totalPages);
@@ -41,7 +42,7 @@ export default function ContactosPage() {
 
   useEffect(() => {
     fetchContactos();
-  }, [page, filtroProyecto]);
+  }, [page, filtroProyecto, filtroEstado]);
 
   useEffect(() => {
     api.proyectos().then(setProyectos).catch(console.error);
@@ -98,21 +99,39 @@ export default function ContactosPage() {
           </div>
 
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardHeader className="flex flex-row items-center justify-between pb-2 gap-4">
               <CardTitle className="text-base">Lista de contactos</CardTitle>
-              <select 
-                className="text-sm p-1.5 border border-slate-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                value={filtroProyecto}
-                onChange={(e) => {
-                  setFiltroProyecto(e.target.value);
-                  setPage(0); // Reset page on filter change
-                }}
-              >
-                <option value="">Todos los proyectos</option>
-                {proyectos.map(p => (
-                  <option key={p.id} value={p.id}>{p.nombre}</option>
-                ))}
-              </select>
+              <div className="flex flex-row gap-2">
+                <select 
+                  className="text-sm p-1.5 border border-slate-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                  value={filtroEstado}
+                  onChange={(e) => {
+                    setFiltroEstado(e.target.value);
+                    setPage(0);
+                  }}
+                >
+                  <option value="">Todos los estados</option>
+                  <option value="PENDIENTE">Pendientes</option>
+                  <option value="EN_GESTION">En Gestión</option>
+                  <option value="CONTACTADO">Contactados</option>
+                  <option value="DESISTIDO">Desistidos</option>
+                  <option value="CERRADO">Cerrados</option>
+                  <option value="CERRADO_POR_INTENTOS">Max Intentos</option>
+                </select>
+                <select 
+                  className="text-sm p-1.5 border border-slate-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                  value={filtroProyecto}
+                  onChange={(e) => {
+                    setFiltroProyecto(e.target.value);
+                    setPage(0); // Reset page on filter change
+                  }}
+                >
+                  <option value="">Todos los proyectos</option>
+                  {proyectos.map(p => (
+                    <option key={p.id} value={p.id}>{p.nombre}</option>
+                  ))}
+                </select>
+              </div>
             </CardHeader>
             <CardContent>
               {loading && <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10 rounded-b-lg"><Loader2 className="w-6 h-6 animate-spin text-indigo-500"/></div>}

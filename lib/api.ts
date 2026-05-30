@@ -162,9 +162,10 @@ export const api = {
     return safeFetch<ExportData[]>(`${BASE}/analytics/export${qs ? `?${qs}` : ""}`);
   },
 
-  contactos: (page = 0, size = 100, proyectoId?: string): Promise<PaginatedResponse<Contacto>> => {
+  contactos: (page = 0, size = 100, proyectoId?: string, estado?: string): Promise<PaginatedResponse<Contacto>> => {
     const params = new URLSearchParams({ page: page.toString(), size: size.toString() });
     if (proyectoId) params.append("proyectoId", proyectoId);
+    if (estado) params.append("estado", estado);
     return safeFetch<PaginatedResponse<Contacto>>(`${BASE}/admin/contacts?${params.toString()}`);
   },
 
