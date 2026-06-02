@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { api, type Metricas, type Proyecto } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { BarChart, PieChart, TrendingUp, PhoneCall, ShieldCheck, Info, Loader2, Filter, Download, Printer } from "lucide-react";
-import html2canvas from "html2canvas";
+import * as htmlToImage from "html-to-image";
 import jsPDF from "jspdf";
 
 export default function GlobalPerformancePage() {
@@ -63,19 +63,20 @@ export default function GlobalPerformancePage() {
     if (buttons) buttons.style.display = "none";
 
     try {
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        logging: true,
+      const dataUrl = await htmlToImage.toPng(element, {
+        pixelRatio: 2,
         backgroundColor: "#f8fafc" // slate-50
       });
       
-      const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF("p", "mm", "a4");
       const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
       
-      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      const img = new Image();
+      img.src = dataUrl;
+      await new Promise((resolve) => { img.onload = resolve; });
+      const pdfHeight = (img.height * pdfWidth) / img.width;
+      
+      pdf.addImage(dataUrl, "PNG", 0, 0, pdfWidth, pdfHeight);
       pdf.save("Reporte_Rendimiento.pdf");
     } catch (err: any) {
       console.error("Error exporting PDF:", err);
