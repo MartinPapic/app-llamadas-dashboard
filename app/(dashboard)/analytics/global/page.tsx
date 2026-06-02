@@ -94,7 +94,7 @@ export default function GlobalPerformancePage() {
       await new Promise(r => setTimeout(r, 200));
       const expandedHeight = element.scrollHeight;
 
-      const CAPTURE_WIDTH = 1400;
+      const CAPTURE_WIDTH = 1600;
       const dataUrl = await htmlToImage.toPng(element, {
         pixelRatio: 2,
         backgroundColor: "#f8fafc",
