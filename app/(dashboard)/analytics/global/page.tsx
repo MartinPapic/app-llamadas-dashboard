@@ -92,11 +92,18 @@ export default function GlobalPerformancePage() {
     // Ocultar scrollbar del contenedor padre para evitar asimetría de márgenes
     const mainEl = element.closest("main");
     if (mainEl) (mainEl as HTMLElement).style.overflow = "hidden";
+    
+    // Guardar estado original
+    const originalWidth = element.style.width;
+    const originalOverflow = element.style.overflow;
+    
+    // Forzar layout en el DOM real para que html-to-image lo copie sin recortes
+    element.style.width = "1600px";
     element.style.overflow = "hidden";
 
     try {
-      // Esperar repintado del DOM tras inyectar estilos compactos
-      await new Promise(r => setTimeout(r, 200));
+      // Esperar repintado del DOM tras forzar 1600px
+      await new Promise(r => setTimeout(r, 300));
       const expandedHeight = element.scrollHeight;
 
       const CAPTURE_WIDTH = 1600;
@@ -108,7 +115,8 @@ export default function GlobalPerformancePage() {
         style: {
           fontFamily: "system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
           width: `${CAPTURE_WIDTH}px`,
-          maxWidth: "none"
+          maxWidth: "none",
+          boxSizing: "border-box"
         }
       });
       
@@ -184,7 +192,8 @@ export default function GlobalPerformancePage() {
     } finally {
       compactStyle.remove();
       if (mainEl) (mainEl as HTMLElement).style.overflow = "";
-      element.style.overflow = "";
+      element.style.width = originalWidth;
+      element.style.overflow = originalOverflow;
       if (buttons) buttons.style.display = "flex";
       if (filterBox) filterBox.style.display = "";
       if (tipificacionesContainer) {
