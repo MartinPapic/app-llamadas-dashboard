@@ -73,9 +73,25 @@ export default function GlobalPerformancePage() {
        tipificacionesContainer.style.maxHeight = "none";
     }
 
+    // Inyectar estilos compactos temporales para que todo quepa en 1 página
+    const compactStyle = document.createElement("style");
+    compactStyle.id = "pdf-compact-style";
+    compactStyle.textContent = `
+      #report-content { padding: 16px !important; gap: 16px !important; }
+      #report-content > div { gap: 12px !important; }
+      #tipificaciones-container li { padding: 6px 16px !important; }
+      #tipificaciones-container .h-1\\.5 { height: 3px !important; margin-top: 2px !important; }
+      #report-content h1 { font-size: 1.5rem !important; }
+      #report-content .text-lg { font-size: 0.85rem !important; }
+      #report-content .grid { gap: 12px !important; }
+      #report-content .mt-6 { margin-top: 12px !important; }
+      #report-content .space-y-8 > * + * { margin-top: 12px !important; }
+    `;
+    document.head.appendChild(compactStyle);
+
     try {
-      // Esperar repintado del DOM tras ocultar elementos
-      await new Promise(r => setTimeout(r, 150));
+      // Esperar repintado del DOM tras inyectar estilos compactos
+      await new Promise(r => setTimeout(r, 200));
       const expandedHeight = element.scrollHeight;
 
       const CAPTURE_WIDTH = 1400;
@@ -157,6 +173,7 @@ export default function GlobalPerformancePage() {
       console.error("Error exporting PDF:", err);
       alert("Error al exportar PDF: " + (err?.message || err || "Error desconocido"));
     } finally {
+      compactStyle.remove();
       if (buttons) buttons.style.display = "flex";
       if (filterBox) filterBox.style.display = "";
       if (tipificacionesContainer) {
