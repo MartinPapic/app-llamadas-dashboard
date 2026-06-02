@@ -3,7 +3,9 @@
 import { useEffect, useState } from "react";
 import { api, type Metricas, type Proyecto } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { BarChart, PieChart, TrendingUp, PhoneCall, ShieldCheck, Info, Loader2, Filter } from "lucide-react";
+import { BarChart, PieChart, TrendingUp, PhoneCall, ShieldCheck, Info, Loader2, Filter, Download, Printer } from "lucide-react";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 export default function GlobalPerformancePage() {
   const [metrics, setMetrics] = useState<Metricas | null>(null);
@@ -46,20 +48,68 @@ export default function GlobalPerformancePage() {
     .map(([nombre, porcentaje]) => ({ nombre, porcentaje }))
     .sort((a, b) => b.porcentaje - a.porcentaje);
 
+  const exportToPDF = async () => {
+    const element = document.getElementById("report-content");
+    if (!element) return;
+    
+    // Ocultar botones temporalmente
+    const buttons = document.getElementById("export-buttons");
+    if (buttons) buttons.style.display = "none";
+
+    try {
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: "#f8fafc" // slate-50
+      });
+      
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.save("Reporte_Rendimiento.pdf");
+    } catch (error) {
+      console.error("Error exporting PDF:", error);
+    } finally {
+      if (buttons) buttons.style.display = "flex";
+    }
+  };
+
   return (
-    <div className="max-w-6xl mx-auto p-8 space-y-8">
-      <div>
-        <h1 className="text-3xl font-extrabold text-slate-900 flex items-center gap-3">
-          <TrendingUp className="w-8 h-8 text-indigo-600" />
-          Rendimiento Operativo Histórico
-        </h1>
-        <p className="text-slate-500 mt-2 text-lg">
-          Resumen acumulado de efectividad, validación de tráfico y desglose de categorización de clientes.
-        </p>
+    <div id="report-content" className="max-w-6xl mx-auto p-8 space-y-8 print:p-0 print:m-0 print:max-w-none print:w-full">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-extrabold text-slate-900 flex items-center gap-3">
+            <TrendingUp className="w-8 h-8 text-indigo-600 print:text-black" />
+            Rendimiento Operativo Histórico
+          </h1>
+          <p className="text-slate-500 mt-2 text-lg print:text-black">
+            Resumen acumulado de efectividad, validación de tráfico y desglose de categorización de clientes.
+          </p>
+        </div>
+        
+        {/* Export Buttons */}
+        <div id="export-buttons" className="flex items-center gap-2 print:hidden">
+          <button 
+            onClick={exportToPDF}
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm font-medium text-sm"
+          >
+            <Download className="w-4 h-4" /> PDF Visual
+          </button>
+          <button 
+            onClick={() => window.print()}
+            className="flex items-center gap-2 px-4 py-2 bg-white text-slate-700 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors shadow-sm font-medium text-sm"
+          >
+            <Printer className="w-4 h-4" /> Imprimir
+          </button>
+        </div>
       </div>
 
       {/* Filtrado */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3 w-full md:w-96">
+      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3 w-full md:w-96 print:hidden">
         <Filter className="w-4 h-4 text-slate-400" />
         <select
           className="flex-1 bg-transparent text-sm border-none focus:ring-0 outline-none"
