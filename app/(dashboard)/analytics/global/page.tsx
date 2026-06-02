@@ -378,7 +378,7 @@ export default function GlobalPerformancePage() {
                    {(Number(metrics?.totalLlamadasValidas || 0) > 0 ? (Number(metrics?.totalContestan || 0) / Number(metrics?.totalLlamadasValidas || 1) * 100) : 0).toFixed(0)}%
                 </div>
                 <div>
-                  <div className="text-sm font-bold text-slate-800">Atención Efectiva (RPC)</div>
+                  <div className="text-sm font-bold text-slate-800">Atención Efectiva</div>
                   <div className="text-xs text-slate-500">Clientes que tomaron el teléfono del agente vs disparos totales realizados al marcador.</div>
                 </div>
               </div>
