@@ -58,11 +58,13 @@ export default function GlobalPerformancePage() {
     
     setExportingPdf(true);
 
-    // Ocultar botones temporalmente
+    // Ocultar botones y filtro temporalmente
     const buttons = document.getElementById("export-buttons");
+    const filterBox = document.getElementById("filter-container");
     if (buttons) buttons.style.display = "none";
+    if (filterBox) filterBox.style.display = "none";
 
-    // Expander scrollbar temporalmente para capturar la lista completa sin cortes
+    // Expandir scrollbar temporalmente para capturar la lista completa
     const tipificacionesContainer = document.getElementById("tipificaciones-container");
     const oldOverflow = tipificacionesContainer?.style.overflow;
     const oldMaxHeight = tipificacionesContainer?.style.maxHeight;
@@ -72,40 +74,91 @@ export default function GlobalPerformancePage() {
     }
 
     try {
-      // Usar un pequeño timeout para asegurar que el DOM haya repintado el layout expandido
-      await new Promise(r => setTimeout(r, 100));
+      // Esperar repintado del DOM tras ocultar elementos
+      await new Promise(r => setTimeout(r, 150));
       const expandedHeight = element.scrollHeight;
 
+      const CAPTURE_WIDTH = 1400;
       const dataUrl = await htmlToImage.toPng(element, {
         pixelRatio: 2,
-        backgroundColor: "#f8fafc", // slate-50
-        width: 1200,
+        backgroundColor: "#f8fafc",
+        width: CAPTURE_WIDTH,
         height: expandedHeight,
         style: {
           fontFamily: "system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
-          width: "1200px",
+          width: `${CAPTURE_WIDTH}px`,
           maxWidth: "none"
         }
       });
       
-      // 'l' para Landscape (horizontal), fundamental para un dashboard ancho
+      // Landscape A4
       const pdf = new jsPDF("l", "mm", "a4");
-      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
       const margin = 10;
-      const usableWidth = pdfWidth - 2 * margin;
-      
-      const img = new Image();
+      const headerHeight = 6; // espacio para el encabezado con fecha
+      const usableWidth = pageWidth - 2 * margin;
+      const usableHeight = pageHeight - 2 * margin - headerHeight;
+
+      // Cargar la imagen capturada
+      const img = new window.Image();
       img.src = dataUrl;
       await new Promise((resolve) => { img.onload = resolve; });
-      const scaledHeight = (img.height * usableWidth) / img.width;
-      
-      pdf.addImage(dataUrl, "PNG", margin, margin, usableWidth, scaledHeight);
+      const totalScaledHeight = (img.height * usableWidth) / img.width;
+
+      // Fecha y hora del reporte
+      const now = new Date();
+      const fechaStr = `Generado el ${now.toLocaleDateString("es-CL")} a las ${now.toLocaleTimeString("es-CL", { hour: "2-digit", minute: "2-digit" })}`;
+
+      // Multi-página: si el contenido es más alto que la hoja, dividir
+      if (totalScaledHeight <= usableHeight) {
+        // Cabe en una sola página
+        pdf.setFontSize(8);
+        pdf.setTextColor(120, 120, 120);
+        pdf.text(fechaStr, pageWidth - margin, margin + 3, { align: "right" });
+        pdf.addImage(dataUrl, "PNG", margin, margin + headerHeight, usableWidth, totalScaledHeight);
+      } else {
+        // Multi-página
+        let yOffset = 0;
+        let pageNum = 0;
+        const sourceRatio = img.width / usableWidth; // px por mm
+
+        while (yOffset < totalScaledHeight) {
+          if (pageNum > 0) pdf.addPage();
+          pageNum++;
+
+          // Encabezado con fecha en cada página
+          pdf.setFontSize(8);
+          pdf.setTextColor(120, 120, 120);
+          pdf.text(fechaStr, pageWidth - margin, margin + 3, { align: "right" });
+          pdf.text(`Página ${pageNum}`, margin, margin + 3);
+
+          // Calcular qué porción de la imagen cortar
+          const sliceHeightMm = Math.min(usableHeight, totalScaledHeight - yOffset);
+          const srcY = yOffset * sourceRatio;
+          const srcH = sliceHeightMm * sourceRatio;
+
+          // Crear canvas temporal con la porción de imagen correspondiente
+          const sliceCanvas = document.createElement("canvas");
+          sliceCanvas.width = img.width;
+          sliceCanvas.height = Math.ceil(srcH);
+          const ctx = sliceCanvas.getContext("2d")!;
+          ctx.drawImage(img, 0, Math.floor(srcY), img.width, Math.ceil(srcH), 0, 0, img.width, Math.ceil(srcH));
+
+          const sliceData = sliceCanvas.toDataURL("image/png");
+          pdf.addImage(sliceData, "PNG", margin, margin + headerHeight, usableWidth, sliceHeightMm);
+
+          yOffset += usableHeight;
+        }
+      }
+
       pdf.save("Reporte_Rendimiento.pdf");
     } catch (err: any) {
       console.error("Error exporting PDF:", err);
       alert("Error al exportar PDF: " + (err?.message || err || "Error desconocido"));
     } finally {
       if (buttons) buttons.style.display = "flex";
+      if (filterBox) filterBox.style.display = "";
       if (tipificacionesContainer) {
          tipificacionesContainer.style.overflow = oldOverflow || "";
          tipificacionesContainer.style.maxHeight = oldMaxHeight || "";
@@ -154,7 +207,7 @@ export default function GlobalPerformancePage() {
       </div>
 
       {/* Filtrado */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3 w-full md:w-96 print:hidden">
+      <div id="filter-container" className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3 w-full md:w-96 print:hidden">
         <Filter className="w-4 h-4 text-slate-400" />
         <select
           className="flex-1 bg-transparent text-sm border-none focus:ring-0 outline-none"
