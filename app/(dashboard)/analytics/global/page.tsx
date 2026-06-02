@@ -76,33 +76,39 @@ export default function GlobalPerformancePage() {
       {/* Top Indicators */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         
-        {/* KPI: Tasa Contacto Efectivo */}
+        {/* KPI: Tasa Contactabilidad */}
         <Card className="bg-gradient-to-br from-emerald-600 to-teal-700 text-white shadow-lg border-none">
           <CardHeader className="pb-2">
             <CardDescription className="text-emerald-100 font-semibold uppercase tracking-wider text-xs flex items-center gap-1">
-              <ShieldCheck className="w-4 h-4"/> % Contactabilidad Efectiva
+              <ShieldCheck className="w-4 h-4"/> % Contactabilidad
             </CardDescription>
             <CardTitle className="text-5xl font-extrabold tracking-tight">
-              {Number(metrics?.tasaContacto || 0).toFixed(1)}%
+              {Number(metrics?.totalLlamadasValidas || 0) > 0 
+                ? ((Number(metrics?.totalContestan || 0) / Number(metrics?.totalLlamadasValidas || 1)) * 100).toFixed(1) 
+                : "0.0"}%
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-emerald-50 text-sm opacity-90">De todas las llamadas con intentos válidos.</p>
+            <p className="text-emerald-50 text-sm opacity-90">Porcentaje de clientes que contestaron el teléfono.</p>
           </CardContent>
         </Card>
 
-        {/* KPI: Gestiones Exitosas */}
+        {/* KPI: Tasa Contestabilidad (Gestiones Exitosas) */}
         <Card className="bg-gradient-to-br from-indigo-600 to-violet-700 text-white shadow-lg border-none">
           <CardHeader className="pb-2">
             <CardDescription className="text-indigo-100 font-semibold uppercase tracking-wider text-xs flex items-center gap-1">
-              <ShieldCheck className="w-4 h-4"/> Gestiones Exitosas
+              <ShieldCheck className="w-4 h-4"/> % Contestabilidad
             </CardDescription>
             <CardTitle className="text-5xl font-extrabold tracking-tight">
-              {Number(metrics?.totalGestionExitosa || 0).toLocaleString()}
+              {Number(metrics?.totalContestan || 0) > 0 
+                ? ((Number(metrics?.totalGestionExitosa || 0) / Number(metrics?.totalContestan || 1)) * 100).toFixed(1) 
+                : "0.0"}%
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-indigo-50 text-sm opacity-90">Encuestas completadas con éxito.</p>
+            <p className="text-indigo-50 text-sm opacity-90">
+              Encuestas respondidas ({metrics?.totalGestionExitosa || 0}) sobre llamadas contestadas.
+            </p>
           </CardContent>
         </Card>
 
