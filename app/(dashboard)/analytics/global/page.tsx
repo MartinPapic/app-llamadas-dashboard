@@ -13,6 +13,7 @@ export default function GlobalPerformancePage() {
   const [selectedProyecto, setSelectedProyecto] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [exportingPdf, setExportingPdf] = useState(false);
 
   useEffect(() => {
     api.proyectos().then(setProyectos).catch(console.error);
@@ -50,8 +51,13 @@ export default function GlobalPerformancePage() {
 
   const exportToPDF = async () => {
     const element = document.getElementById("report-content");
-    if (!element) return;
+    if (!element) {
+      alert("No se encontró el elemento contenedor para exportar.");
+      return;
+    }
     
+    setExportingPdf(true);
+
     // Ocultar botones temporalmente
     const buttons = document.getElementById("export-buttons");
     if (buttons) buttons.style.display = "none";
@@ -60,7 +66,7 @@ export default function GlobalPerformancePage() {
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
-        logging: false,
+        logging: true,
         backgroundColor: "#f8fafc" // slate-50
       });
       
@@ -71,10 +77,12 @@ export default function GlobalPerformancePage() {
       
       pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
       pdf.save("Reporte_Rendimiento.pdf");
-    } catch (error) {
-      console.error("Error exporting PDF:", error);
+    } catch (err: any) {
+      console.error("Error exporting PDF:", err);
+      alert("Error al exportar PDF: " + (err?.message || err || "Error desconocido"));
     } finally {
       if (buttons) buttons.style.display = "flex";
+      setExportingPdf(false);
     }
   };
 
@@ -95,9 +103,18 @@ export default function GlobalPerformancePage() {
         <div id="export-buttons" className="flex items-center gap-2 print:hidden">
           <button 
             onClick={exportToPDF}
-            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm font-medium text-sm"
+            disabled={exportingPdf}
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm font-medium text-sm disabled:opacity-50"
           >
-            <Download className="w-4 h-4" /> PDF Visual
+            {exportingPdf ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" /> Generando...
+              </>
+            ) : (
+              <>
+                <Download className="w-4 h-4" /> PDF Visual
+              </>
+            )}
           </button>
           <button 
             onClick={() => window.print()}
