@@ -89,6 +89,11 @@ export default function GlobalPerformancePage() {
     `;
     document.head.appendChild(compactStyle);
 
+    // Ocultar scrollbar del contenedor padre para evitar asimetría de márgenes
+    const mainEl = element.closest("main");
+    if (mainEl) (mainEl as HTMLElement).style.overflow = "hidden";
+    element.style.overflow = "hidden";
+
     try {
       // Esperar repintado del DOM tras inyectar estilos compactos
       await new Promise(r => setTimeout(r, 200));
@@ -178,6 +183,8 @@ export default function GlobalPerformancePage() {
       alert("Error al exportar PDF: " + (err?.message || err || "Error desconocido"));
     } finally {
       compactStyle.remove();
+      if (mainEl) (mainEl as HTMLElement).style.overflow = "";
+      element.style.overflow = "";
       if (buttons) buttons.style.display = "flex";
       if (filterBox) filterBox.style.display = "";
       if (tipificacionesContainer) {
