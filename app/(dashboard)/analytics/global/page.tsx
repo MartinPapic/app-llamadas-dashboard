@@ -210,7 +210,7 @@ export default function GlobalPerformancePage() {
                  <Info className="w-4 h-4 shrink-0 mt-0.5 text-blue-600" />
                  <div>
                    <p className="font-semibold">Regla de Calidad Vigente:</p>
-                   <p className="text-xs opacity-80 mt-1">Solo se consideran "Intentos Válidos" las marcaciones únicas diarias por registro y las que superaron el filtro anti-fraude.</p>
+                   <p className="text-xs opacity-80 mt-1">Solo se consideran "Intentos Válidos" las marcaciones únicas diarias por registro.</p>
                  </div>
               </div>
 
