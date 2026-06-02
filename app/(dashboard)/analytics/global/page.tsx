@@ -106,9 +106,27 @@ export default function GlobalPerformancePage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-indigo-50 text-sm opacity-90">
+            <p className="text-indigo-50 text-sm opacity-90 mb-3">
               Encuestas respondidas ({metrics?.totalGestionExitosa || 0}) sobre llamadas contestadas.
             </p>
+            {/* Meta Progress */}
+            {metrics?.metaGestionesExitosas ? (
+              <div className="mt-2">
+                <div className="flex justify-between text-xs font-semibold text-indigo-100 mb-1">
+                  <span>Avance hacia la Meta</span>
+                  <span>{metrics.totalGestionExitosa} / {metrics.metaGestionesExitosas}</span>
+                </div>
+                <div className="w-full bg-indigo-900/50 h-2 rounded-full overflow-hidden">
+                  <div 
+                    className="bg-indigo-300 h-full rounded-full transition-all duration-500" 
+                    style={{ width: `${Math.min((metrics.totalGestionExitosa / metrics.metaGestionesExitosas) * 100, 100)}%` }}
+                  ></div>
+                </div>
+                <div className="text-right text-[10px] text-indigo-200 mt-1">
+                  {((metrics.totalGestionExitosa / metrics.metaGestionesExitosas) * 100).toFixed(1)}% de la meta alcanzada
+                </div>
+              </div>
+            ) : null}
           </CardContent>
         </Card>
 

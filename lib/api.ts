@@ -12,6 +12,7 @@ export interface Metricas {
   tasaContacto: number;
   distribucionTipificaciones: Record<string, number>;
   totalGestionExitosa: number;
+  metaGestionesExitosas: number;
 }
 
 export interface RealtimeMetrics {
