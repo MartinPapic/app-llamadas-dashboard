@@ -62,27 +62,54 @@ export default function GlobalPerformancePage() {
     const buttons = document.getElementById("export-buttons");
     if (buttons) buttons.style.display = "none";
 
+    // Expander scrollbar temporalmente para capturar la lista completa sin cortes
+    const tipificacionesContainer = document.getElementById("tipificaciones-container");
+    const oldOverflow = tipificacionesContainer?.style.overflow;
+    const oldMaxHeight = tipificacionesContainer?.style.maxHeight;
+    if (tipificacionesContainer) {
+       tipificacionesContainer.style.overflow = "visible";
+       tipificacionesContainer.style.maxHeight = "none";
+    }
+
     try {
+      // Usar un pequeño timeout para asegurar que el DOM haya repintado el layout expandido
+      await new Promise(r => setTimeout(r, 100));
+      const expandedHeight = element.scrollHeight;
+
       const dataUrl = await htmlToImage.toPng(element, {
         pixelRatio: 2,
-        backgroundColor: "#f8fafc" // slate-50
+        backgroundColor: "#f8fafc", // slate-50
+        width: 1200,
+        height: expandedHeight,
+        style: {
+          fontFamily: "system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+          width: "1200px",
+          maxWidth: "none"
+        }
       });
       
-      const pdf = new jsPDF("p", "mm", "a4");
+      // 'l' para Landscape (horizontal), fundamental para un dashboard ancho
+      const pdf = new jsPDF("l", "mm", "a4");
       const pdfWidth = pdf.internal.pageSize.getWidth();
+      const margin = 10;
+      const usableWidth = pdfWidth - 2 * margin;
       
       const img = new Image();
       img.src = dataUrl;
       await new Promise((resolve) => { img.onload = resolve; });
-      const pdfHeight = (img.height * pdfWidth) / img.width;
+      const scaledHeight = (img.height * usableWidth) / img.width;
       
-      pdf.addImage(dataUrl, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.addImage(dataUrl, "PNG", margin, margin, usableWidth, scaledHeight);
       pdf.save("Reporte_Rendimiento.pdf");
     } catch (err: any) {
       console.error("Error exporting PDF:", err);
       alert("Error al exportar PDF: " + (err?.message || err || "Error desconocido"));
     } finally {
       if (buttons) buttons.style.display = "flex";
+      if (tipificacionesContainer) {
+         tipificacionesContainer.style.overflow = oldOverflow || "";
+         tipificacionesContainer.style.maxHeight = oldMaxHeight || "";
+      }
       setExportingPdf(false);
     }
   };
@@ -232,7 +259,7 @@ export default function GlobalPerformancePage() {
             </CardTitle>
             <CardDescription>Proporción que representa cada motivo sobre la base total de tráfico emitido.</CardDescription>
           </CardHeader>
-          <CardContent className="p-0 flex-1 overflow-y-auto max-h-[500px]">
+          <CardContent id="tipificaciones-container" className="p-0 flex-1 overflow-y-auto max-h-[500px]">
             {tipificacionesFormatted.length === 0 ? (
               <div className="p-8 text-center text-slate-400 text-sm">No hay tipificaciones registradas aún.</div>
             ) : (
