@@ -249,4 +249,11 @@ export const api = {
 
   desbloquearContacto: (id: string): Promise<{ success: boolean }> =>
     safeFetch(`${BASE}/contacts/${id}/unlock`, { method: "POST" }),
+
+  desbloquearContactosBulk: (proyectoId?: string, estado?: string): Promise<{ success: boolean; message: string; afectados: number }> => {
+    const params = new URLSearchParams();
+    if (proyectoId) params.append("proyectoId", proyectoId);
+    if (estado) params.append("estado", estado);
+    return safeFetch(`${BASE}/contacts/unlock-bulk?${params.toString()}`, { method: "POST" });
+  },
 };

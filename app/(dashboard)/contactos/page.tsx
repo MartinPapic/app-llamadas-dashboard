@@ -48,6 +48,23 @@ export default function ContactosPage() {
     api.proyectos().then(setProyectos).catch(console.error);
   }, []);
 
+  const [isUnlockingBulk, setIsUnlockingBulk] = useState(false);
+
+  const handleBulkUnlock = async () => {
+    if (!confirm("¿Estás seguro de reiniciar todos los contactos bloqueados que coincidan con los filtros actuales?\n\nSe borrarán sus intentos y volverán a estar disponibles en la bolsa global.")) return;
+    try {
+      setIsUnlockingBulk(true);
+      const res = await api.desbloquearContactosBulk(filtroProyecto || undefined, filtroEstado || undefined);
+      alert(res.message);
+      setPage(0);
+      fetchContactos();
+    } catch (err: any) {
+      alert(err.message || "Error al realizar el desbloqueo masivo.");
+    } finally {
+      setIsUnlockingBulk(false);
+    }
+  };
+
   const pendientes  = funnel?.estados["PENDIENTE"] || 0;
   const enGestion   = funnel?.estados["EN_GESTION"] || 0;
   const contactados = funnel?.estados["CONTACTADO"] || 0;
@@ -99,9 +116,18 @@ export default function ContactosPage() {
           </div>
 
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2 gap-4">
+            <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between pb-2 gap-4">
               <CardTitle className="text-base">Lista de contactos</CardTitle>
-              <div className="flex flex-row gap-2">
+              <div className="flex flex-wrap gap-2 items-center">
+                <button
+                  onClick={handleBulkUnlock}
+                  disabled={isUnlockingBulk}
+                  className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-orange-700 bg-orange-100 hover:bg-orange-200 rounded-md transition-colors disabled:opacity-50"
+                  title="Desbloquear todos los contactos bloqueados con estos filtros"
+                >
+                  {isUnlockingBulk ? <Loader2 className="w-4 h-4 animate-spin" /> : "🔓"}
+                  Desbloquear Filtrados
+                </button>
                 <select 
                   className="text-sm p-1.5 border border-slate-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                   value={filtroEstado}
