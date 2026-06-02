@@ -77,7 +77,7 @@ export default function GlobalPerformancePage() {
     const compactStyle = document.createElement("style");
     compactStyle.id = "pdf-compact-style";
     compactStyle.textContent = `
-      #report-content { padding: 16px !important; gap: 16px !important; }
+      #report-content { padding: 24px 32px !important; gap: 16px !important; max-width: none !important; margin: 0 !important; }
       #report-content > div { gap: 12px !important; }
       #tipificaciones-container li { padding: 6px 16px !important; }
       #tipificaciones-container .h-1\\.5 { height: 3px !important; margin-top: 2px !important; }
@@ -122,8 +122,11 @@ export default function GlobalPerformancePage() {
       await new Promise((resolve) => { img.onload = resolve; });
       const totalScaledHeight = (img.height * usableWidth) / img.width;
 
-      // Fecha y hora del reporte
+      // Fecha, hora y proyecto del reporte
       const now = new Date();
+      const proyectoNombre = selectedProyecto
+        ? proyectos.find(p => p.id === selectedProyecto)?.nombre || "Proyecto"
+        : "Todos los Proyectos";
       const fechaStr = `Generado el ${now.toLocaleDateString("es-CL")} a las ${now.toLocaleTimeString("es-CL", { hour: "2-digit", minute: "2-digit" })}`;
 
       // Multi-página: si el contenido es más alto que la hoja, dividir
@@ -132,6 +135,7 @@ export default function GlobalPerformancePage() {
         pdf.setFontSize(8);
         pdf.setTextColor(120, 120, 120);
         pdf.text(fechaStr, pageWidth - margin, margin + 3, { align: "right" });
+        pdf.text(`Proyecto: ${proyectoNombre}`, margin, margin + 3);
         pdf.addImage(dataUrl, "PNG", margin, margin + headerHeight, usableWidth, totalScaledHeight);
       } else {
         // Multi-página
@@ -147,7 +151,7 @@ export default function GlobalPerformancePage() {
           pdf.setFontSize(8);
           pdf.setTextColor(120, 120, 120);
           pdf.text(fechaStr, pageWidth - margin, margin + 3, { align: "right" });
-          pdf.text(`Página ${pageNum}`, margin, margin + 3);
+          pdf.text(`Proyecto: ${proyectoNombre} — Página ${pageNum}`, margin, margin + 3);
 
           // Calcular qué porción de la imagen cortar
           const sliceHeightMm = Math.min(usableHeight, totalScaledHeight - yOffset);
