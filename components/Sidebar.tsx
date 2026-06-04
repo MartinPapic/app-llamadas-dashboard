@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Phone, Users, LogOut, BarChart3, ClipboardCheck, Briefcase } from "lucide-react";
+import { LayoutDashboard, Phone, Users, LogOut, BarChart3, ClipboardCheck, Briefcase, Target } from "lucide-react";
 import { logout } from "@/lib/auth";
 
 const links = [
   { href: "/",          label: "Supervisor (En vivo)", icon: LayoutDashboard },
   { href: "/proyectos", label: "Proyectos", icon: Briefcase },
   { href: "/analytics/global", label: "Rendimiento", icon: BarChart3 },
+  { href: "/analytics/metas", label: "Avance de Metas", icon: Target },
   { href: "/analytics/agents", label: "Productividad", icon: BarChart3 },
   { href: "/analytics/funnel", label: "Salud de Base", icon: BarChart3 },
   { href: "/contactos", label: "Directorio", icon: Users },
