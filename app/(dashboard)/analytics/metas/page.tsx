@@ -27,17 +27,24 @@ export default function AvanceMetasPage() {
     const btn = document.getElementById("export-btn");
     if (btn) btn.style.display = "none";
 
-    const originalWidth = element.style.width;
-    const originalMaxWidth = element.style.maxWidth;
-    const originalOverflow = element.style.overflow;
-    
-    // Forzar ancho a 1280px para garantizar 3 columnas (xl)
-    element.style.width = "1280px";
-    element.style.maxWidth = "1280px";
-    element.style.overflow = "hidden";
+    const compactStyle = document.createElement("style");
+    compactStyle.id = "pdf-metas-style";
+    compactStyle.textContent = `
+      #metas-report-content {
+        margin: 0 !important;
+        max-width: none !important;
+        width: 1280px !important;
+        padding: 32px !important;
+      }
+    `;
+    document.head.appendChild(compactStyle);
+
+    const mainEl = element.closest("main");
+    const originalMainOverflow = mainEl ? (mainEl as HTMLElement).style.overflow : "";
+    if (mainEl) (mainEl as HTMLElement).style.overflow = "visible";
 
     try {
-      await new Promise(r => setTimeout(r, 300));
+      await new Promise(r => setTimeout(r, 400)); // Esperar repintado
       const expandedHeight = element.scrollHeight;
 
       const dataUrl = await htmlToImage.toPng(element, {
@@ -49,6 +56,7 @@ export default function AvanceMetasPage() {
           fontFamily: "system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
           width: "1280px",
           maxWidth: "1280px",
+          margin: "0",
           boxSizing: "border-box"
         }
       });
@@ -57,10 +65,9 @@ export default function AvanceMetasPage() {
       img.src = dataUrl;
       await new Promise((resolve) => { img.onload = resolve; });
       
-      const pdfWidth = 297; // Ancho A4 en landscape aprox
+      const pdfWidth = 297; 
       const pdfHeight = (img.height * pdfWidth) / img.width;
       
-      // Creamos un PDF de 1 sola página (portrait) con alto dinámico
       const pdf = new jsPDF("p", "mm", [pdfWidth, pdfHeight + 15]);
       
       const now = new Date();
@@ -77,9 +84,9 @@ export default function AvanceMetasPage() {
       console.error(err);
       alert("Error al exportar PDF");
     } finally {
-      element.style.width = originalWidth;
-      element.style.maxWidth = originalMaxWidth;
-      element.style.overflow = originalOverflow;
+      if (mainEl) (mainEl as HTMLElement).style.overflow = originalMainOverflow;
+      const styleNode = document.getElementById("pdf-metas-style");
+      if (styleNode) styleNode.remove();
       if (btn) btn.style.display = "flex";
       setExportingPdf(false);
     }
