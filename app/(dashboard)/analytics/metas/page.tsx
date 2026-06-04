@@ -3,7 +3,9 @@
 import { useEffect, useState } from "react";
 import { api, type Proyecto, type Metricas } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Target, Loader2, AlertTriangle, TrendingUp } from "lucide-react";
+import { Target, Loader2, AlertTriangle, TrendingUp, Download } from "lucide-react";
+import * as htmlToImage from "html-to-image";
+import jsPDF from "jspdf";
 
 interface ProyectoConMetricas extends Proyecto {
   metricas: Metricas | null;
@@ -14,6 +16,74 @@ export default function AvanceMetasPage() {
   const [proyectos, setProyectos] = useState<ProyectoConMetricas[]>([]);
   const [loading, setLoading] = useState(true);
   const [globalError, setGlobalError] = useState<string | null>(null);
+  const [exportingPdf, setExportingPdf] = useState(false);
+
+  const exportToPDF = async () => {
+    const element = document.getElementById("metas-report-content");
+    if (!element) return;
+    
+    setExportingPdf(true);
+
+    const btn = document.getElementById("export-btn");
+    if (btn) btn.style.display = "none";
+
+    const originalWidth = element.style.width;
+    const originalMaxWidth = element.style.maxWidth;
+    const originalOverflow = element.style.overflow;
+    
+    // Forzar ancho a 1280px para garantizar 3 columnas (xl)
+    element.style.width = "1280px";
+    element.style.maxWidth = "1280px";
+    element.style.overflow = "hidden";
+
+    try {
+      await new Promise(r => setTimeout(r, 300));
+      const expandedHeight = element.scrollHeight;
+
+      const dataUrl = await htmlToImage.toPng(element, {
+        pixelRatio: 2,
+        backgroundColor: "#f8fafc",
+        width: 1280,
+        height: expandedHeight,
+        style: {
+          fontFamily: "system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+          width: "1280px",
+          maxWidth: "1280px",
+          boxSizing: "border-box"
+        }
+      });
+      
+      const img = new window.Image();
+      img.src = dataUrl;
+      await new Promise((resolve) => { img.onload = resolve; });
+      
+      const pdfWidth = 297; // Ancho A4 en landscape aprox
+      const pdfHeight = (img.height * pdfWidth) / img.width;
+      
+      // Creamos un PDF de 1 sola página (portrait) con alto dinámico
+      const pdf = new jsPDF("p", "mm", [pdfWidth, pdfHeight + 15]);
+      
+      const now = new Date();
+      const fechaStr = `Generado el ${now.toLocaleDateString("es-CL")} a las ${now.toLocaleTimeString("es-CL", { hour: "2-digit", minute: "2-digit" })}`;
+      
+      pdf.setFontSize(10);
+      pdf.setTextColor(120, 120, 120);
+      pdf.text(fechaStr, 10, 10);
+      
+      pdf.addImage(dataUrl, "PNG", 0, 15, pdfWidth, pdfHeight);
+      pdf.save("Avance_Metas.pdf");
+      
+    } catch (err: any) {
+      console.error(err);
+      alert("Error al exportar PDF");
+    } finally {
+      element.style.width = originalWidth;
+      element.style.maxWidth = originalMaxWidth;
+      element.style.overflow = originalOverflow;
+      if (btn) btn.style.display = "flex";
+      setExportingPdf(false);
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -68,15 +138,30 @@ export default function AvanceMetasPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-8">
-      <div>
-        <h1 className="text-3xl font-extrabold text-slate-900 flex items-center gap-3">
-          <Target className="w-8 h-8 text-indigo-600" />
-          Avance de Metas por Proyecto
-        </h1>
-        <p className="text-slate-500 mt-2 text-lg">
-          Monitoreo en tiempo real del progreso hacia el objetivo de gestiones exitosas en todos los proyectos activos.
-        </p>
+    <div id="metas-report-content" className="max-w-7xl mx-auto p-4 md:p-8 space-y-8 bg-slate-50 min-h-screen">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-extrabold text-slate-900 flex items-center gap-3">
+            <Target className="w-8 h-8 text-indigo-600" />
+            Avance de Metas por Proyecto
+          </h1>
+          <p className="text-slate-500 mt-2 text-lg">
+            Monitoreo en tiempo real del progreso hacia el objetivo de gestiones exitosas en todos los proyectos activos.
+          </p>
+        </div>
+        
+        <button
+          id="export-btn"
+          onClick={exportToPDF}
+          disabled={exportingPdf}
+          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm font-medium text-sm disabled:opacity-50 shrink-0"
+        >
+          {exportingPdf ? (
+            <><Loader2 className="w-4 h-4 animate-spin" /> Generando...</>
+          ) : (
+            <><Download className="w-4 h-4" /> Exportar PDF</>
+          )}
+        </button>
       </div>
 
       {proyectos.length === 0 ? (
