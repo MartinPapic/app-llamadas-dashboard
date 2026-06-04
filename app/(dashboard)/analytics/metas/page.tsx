@@ -47,8 +47,10 @@ export default function AvanceMetasPage() {
       await new Promise(r => setTimeout(r, 400)); // Esperar repintado
       const expandedHeight = element.scrollHeight;
 
+      const isMobile = window.innerWidth <= 768;
+      
       const dataUrl = await htmlToImage.toPng(element, {
-        pixelRatio: 2,
+        pixelRatio: isMobile ? 1 : 2,
         backgroundColor: "#f8fafc",
         width: 1280,
         height: expandedHeight,
@@ -61,9 +63,16 @@ export default function AvanceMetasPage() {
         }
       });
       
+      if (!dataUrl || dataUrl === "data:,") {
+        throw new Error("La imagen se generó vacía. Posible límite de memoria del navegador.");
+      }
+      
       const img = new window.Image();
-      img.src = dataUrl;
-      await new Promise((resolve) => { img.onload = resolve; });
+      await new Promise((resolve, reject) => { 
+        img.onload = resolve; 
+        img.onerror = () => reject(new Error("Fallo al decodificar la imagen generada"));
+        img.src = dataUrl; 
+      });
       
       const pdfWidth = 297; 
       const pdfHeight = (img.height * pdfWidth) / img.width;
