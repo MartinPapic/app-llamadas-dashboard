@@ -29,13 +29,13 @@ export default function LlamadasPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([api.llamadas(), api.agentes()])
-      .then(([llamadasData, agentesData]) => {
+    Promise.all([api.llamadas(), api.usuarios()])
+      .then(([llamadasData, usuariosData]) => {
         setLlamadas(llamadasData);
         
         const map: Record<string, string> = {};
-        agentesData.forEach(a => {
-          map[a.id] = a.nombre;
+        usuariosData.forEach(u => {
+          map[u.id] = u.nombre;
         });
         setAgentesMap(map);
       })

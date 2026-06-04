@@ -27,7 +27,7 @@ export default function AgentPerformancePage() {
 
   useEffect(() => {
     setLoading(true);
-    Promise.all([api.agentes(), api.proyectos(), api.agenteStats(selectedProyecto)])
+    Promise.all([api.usuarios(), api.proyectos(), api.agenteStats(selectedProyecto)])
       .then(([agentesData, proyectosData, statsData]) => {
         setAgentes(agentesData);
         setProyectos(proyectosData);

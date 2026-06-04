@@ -107,7 +107,7 @@ export default function SupervisorRealtimePage() {
 
   useEffect(() => {
     setLoading(true);
-    Promise.all([api.proyectos(), api.agentes(), api.realtimeMetrics(selectedProyecto || undefined)])
+    Promise.all([api.proyectos(), api.usuarios(), api.realtimeMetrics(selectedProyecto || undefined)])
       .then(([proyectosData, agentesData, metricsData]) => {
         setProyectos(proyectosData);
         setAgentes(agentesData);

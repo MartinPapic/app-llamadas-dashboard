@@ -195,6 +195,9 @@ export const api = {
   agentes: (): Promise<Array<{ id: string; nombre: string; email: string }>> =>
     safeFetch(`${BASE}/admin/agents`),
 
+  usuarios: (): Promise<Array<{ id: string; nombre: string; email: string; rol: string; activo: boolean }>> =>
+    safeFetch(`${BASE}/usuarios`),
+
   agenteStats: (proyectoId?: string): Promise<any[]> =>
     safeFetch(`${BASE}/analytics/agents${proyectoId ? `?proyectoId=${proyectoId}` : ""}`),
 
