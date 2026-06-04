@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Edit2, Trash2, Shield, User } from "lucide-react";
+import { Plus, Edit2, Shield, User, UserX, UserCheck } from "lucide-react";
 import { getToken } from "@/lib/auth"; // Adivinando el path. Si falla, reviso.
 
 type Usuario = {
@@ -9,6 +9,7 @@ type Usuario = {
   nombre: string;
   email: string;
   rol: string;
+  activo: boolean;
 };
 
 export default function UsuariosPage() {
@@ -116,16 +117,20 @@ export default function UsuariosPage() {
     }
   };
 
-  const handleDelete = async (id: string, email: string) => {
-    if (!confirm(`¿Estás seguro de eliminar al usuario ${email}?`)) return;
+  const handleToggleActivo = async (u: Usuario) => {
+    const accion = u.activo ? "desactivar" : "reactivar";
+    if (!confirm(`¿Estás seguro de ${accion} al usuario ${u.email}?`)) return;
     try {
-      const res = await fetch(`${apiBaseUrl}/usuarios/${id}`, {
-        method: "DELETE"
-      });
+      const url = u.activo 
+        ? `${apiBaseUrl}/usuarios/${u.id}` 
+        : `${apiBaseUrl}/usuarios/${u.id}/reactivar`;
+      const method = u.activo ? "DELETE" : "POST";
+
+      const res = await fetch(url, { method });
 
       if (!res.ok) {
         const errData = await res.json().catch(() => null);
-        throw new Error(errData?.error || "Error al eliminar el usuario");
+        throw new Error(errData?.error || `Error al ${accion} el usuario`);
       }
       
       await fetchUsuarios();
@@ -169,12 +174,13 @@ export default function UsuariosPage() {
               <th className="px-6 py-4">Nombre</th>
               <th className="px-6 py-4">Correo</th>
               <th className="px-6 py-4">Rol</th>
+              <th className="px-6 py-4">Estado</th>
               <th className="px-6 py-4 text-right">Acciones</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {usuarios.map((u) => (
-              <tr key={u.id} className="hover:bg-slate-50 transition-colors">
+              <tr key={u.id} className={`hover:bg-slate-50 transition-colors ${!u.activo ? 'opacity-60 bg-slate-50/50' : ''}`}>
                 <td className="px-6 py-4 font-medium text-slate-900">{u.nombre}</td>
                 <td className="px-6 py-4 text-slate-500">{u.email}</td>
                 <td className="px-6 py-4">
@@ -190,6 +196,18 @@ export default function UsuariosPage() {
                     {u.rol.toUpperCase()}
                   </span>
                 </td>
+                <td className="px-6 py-4">
+                  <span
+                    className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border
+                      ${
+                        u.activo
+                          ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                          : "bg-rose-50 text-rose-700 border-rose-200"
+                      }`}
+                  >
+                    {u.activo ? "Activo" : "Inactivo"}
+                  </span>
+                </td>
                 <td className="px-6 py-4 text-right">
                   <div className="flex items-center justify-end gap-2">
                     <button
@@ -200,11 +218,15 @@ export default function UsuariosPage() {
                       <Edit2 className="h-4 w-4" />
                     </button>
                     <button
-                      onClick={() => handleDelete(u.id, u.email)}
-                      className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                      title="Eliminar"
+                      onClick={() => handleToggleActivo(u)}
+                      className={`p-2 rounded-lg transition-colors ${
+                        u.activo 
+                          ? "text-slate-400 hover:text-rose-600 hover:bg-rose-50" 
+                          : "text-slate-400 hover:text-emerald-600 hover:bg-emerald-50"
+                      }`}
+                      title={u.activo ? "Desactivar" : "Reactivar"}
                     >
-                      <Trash2 className="h-4 w-4" />
+                      {u.activo ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
                     </button>
                   </div>
                 </td>
