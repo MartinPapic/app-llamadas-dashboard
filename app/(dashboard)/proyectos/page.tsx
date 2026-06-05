@@ -321,9 +321,14 @@ export default function ProyectosPage() {
                             <div key={lista.id} className="bg-white border border-slate-200 rounded-lg p-3">
                               <div className="flex items-center justify-between mb-2">
                                 <div className="flex items-center gap-3 flex-wrap">
-                                  <h4 className="font-semibold text-slate-800 text-sm">
-                                    {lista.nombre}
-                                  </h4>
+                                  <div className="flex flex-col">
+                                    <h4 className="font-semibold text-slate-800 text-sm">
+                                      {lista.nombre}
+                                    </h4>
+                                    <span className="text-[11px] text-slate-500 font-medium">
+                                      {lista.totalContactos || 0} contactos cargados
+                                    </span>
+                                  </div>
                                   <div className="flex items-center gap-1.5" title="Establecer límite de gestiones exitosas. Presiona Enter o haz clic fuera para guardar.">
                                     <span className="text-[10px] text-slate-400 font-medium shrink-0 bg-slate-100 px-1.5 py-0.5 rounded">Tope:</span>
                                     <Input

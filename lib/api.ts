@@ -42,6 +42,7 @@ export interface Lista {
   fechaCreacion: number;
   estado: string;
   maxGestionExitosa?: number | null;
+  totalContactos?: number;
 }
 
 export interface Contacto {
