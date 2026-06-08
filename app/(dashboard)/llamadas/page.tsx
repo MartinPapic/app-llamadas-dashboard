@@ -25,19 +25,42 @@ function formatDuracion(seg: number | null): string {
 export default function LlamadasPage() {
   const [llamadas, setLlamadas] = useState<Llamada[]>([]);
   const [agentesMap, setAgentesMap] = useState<Record<string, string>>({});
+  const [proyectosMap, setProyectosMap] = useState<Record<string, string>>({});
+  const [listasMap, setListasMap] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([api.llamadas(), api.usuarios()])
-      .then(([llamadasData, usuariosData]) => {
+    Promise.all([api.llamadas(), api.usuarios(), api.proyectos()])
+      .then(async ([llamadasData, usuariosData, proyectosData]) => {
         setLlamadas(llamadasData);
         
-        const map: Record<string, string> = {};
+        const uMap: Record<string, string> = {};
         usuariosData.forEach(u => {
-          map[u.id] = u.nombre;
+          uMap[u.id] = u.nombre;
         });
-        setAgentesMap(map);
+        setAgentesMap(uMap);
+
+        const pMap: Record<string, string> = {};
+        proyectosData.forEach(p => {
+          pMap[p.id] = p.nombre;
+        });
+        setProyectosMap(pMap);
+
+        const lMap: Record<string, string> = {};
+        await Promise.all(
+          proyectosData.map(async (p) => {
+            try {
+              const listas = await api.listasDeProyecto(p.id);
+              listas.forEach(l => {
+                lMap[l.id] = l.nombre;
+              });
+            } catch (e) {
+              console.error("Error fetching lists for project", p.id, e);
+            }
+          })
+        );
+        setListasMap(lMap);
       })
       .catch((err: unknown) =>
         setError(err instanceof Error ? err.message : "Error al cargar datos")
@@ -73,7 +96,7 @@ export default function LlamadasPage() {
           <CardHeader>
             <CardTitle className="text-base">Todas las llamadas</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="overflow-x-auto">
             {sorted.length === 0 && !error ? (
               <div className="flex items-center justify-center py-12 text-muted-foreground text-sm">
                 No hay llamadas registradas aún.
@@ -83,6 +106,8 @@ export default function LlamadasPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Agente</TableHead>
+                    <TableHead>Proyecto</TableHead>
+                    <TableHead>Lista</TableHead>
                     <TableHead>Fecha y hora</TableHead>
                     <TableHead>Resultado</TableHead>
                     <TableHead>Duración</TableHead>
@@ -98,6 +123,12 @@ export default function LlamadasPage() {
                       <TableRow key={l.id} className="hover:bg-slate-50 transition-colors">
                         <TableCell className="font-medium text-sm" title={l.usuarioId}>
                           {agentesMap[l.usuarioId] || l.usuarioId}
+                        </TableCell>
+                        <TableCell className="text-sm text-slate-500">
+                          {l.proyectoId ? (proyectosMap[l.proyectoId] || "Eliminado") : "—"}
+                        </TableCell>
+                        <TableCell className="text-sm text-slate-500">
+                          {l.listaId ? (listasMap[l.listaId] || "Eliminada") : "—"}
                         </TableCell>
                         <TableCell className="text-sm text-slate-500 whitespace-nowrap">
                           {format(new Date(l.fechaInicio), "dd/MM/yyyy HH:mm", { locale: es })}

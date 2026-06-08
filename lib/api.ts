@@ -71,6 +71,7 @@ export interface Llamada {
   motivo: string | null;
   observacion: string | null;
   proyectoId?: string;
+  listaId?: string;
 }
 
 export interface ExportData {
