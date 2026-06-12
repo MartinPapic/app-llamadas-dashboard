@@ -51,7 +51,7 @@ export default function FunnelPage() {
   const pendientes = estados["PENDIENTE"] || 0;
   const enGestion = estados["EN_GESTION"] || 0;
   const contactados = estados["CONTACTADO"] || 0;
-  const desistidos = estados["DESISTIDO"] || 0;
+  const desistidos = (estados["DESISTIDO"] || 0) + (estados["CERRADO"] || 0) + (estados["CERRADO_POR_INTENTOS"] || 0);
 
   const totalProcesados = contactados + desistidos;
   const conversionBruta = m.totalBase > 0 ? (contactados / m.totalBase) * 100 : 0;
