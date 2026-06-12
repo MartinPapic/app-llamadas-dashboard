@@ -48,7 +48,7 @@ export default function AgentPerformancePage() {
       const nombre = agent ? agent.nombre : "Agente Desconocido";
 
       const totalEmitidas = stat.totalLlamadas || 0;
-      const totalNoContesta = stat.noContesta || 0;
+      const totalNoContesta = stat.noContestan || 0;
       const intentosCortos = stat.llamadasCortas || 0;
       const totalEfectivos = stat.efectivos || 0;
       const tasaEfectividad = stat.tasaEfectividad || 0;
