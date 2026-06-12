@@ -70,6 +70,13 @@ export default function LlamadasPage() {
 
   const sorted = [...llamadas].sort((a, b) => b.fechaInicio - a.fechaInicio);
 
+  // Identificar llamadas repetidas el mismo día
+  const callsByContactDay: Record<string, number> = {};
+  sorted.forEach(l => {
+    const dayKey = `${l.contactoId}_${format(new Date(l.fechaInicio), "yyyy-MM-dd")}`;
+    callsByContactDay[dayKey] = (callsByContactDay[dayKey] || 0) + 1;
+  });
+
   return (
     <div className="space-y-6">
       <div>
@@ -132,6 +139,11 @@ export default function LlamadasPage() {
                         </TableCell>
                         <TableCell className="text-sm text-slate-500 whitespace-nowrap">
                           {format(new Date(l.fechaInicio), "dd/MM/yyyy HH:mm", { locale: es })}
+                          {callsByContactDay[`${l.contactoId}_${format(new Date(l.fechaInicio), "yyyy-MM-dd")}`] > 1 && (
+                            <span className="ml-2 inline-flex items-center rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 ring-1 ring-inset ring-purple-700/10" title="Este contacto fue llamado múltiples veces el mismo día">
+                              Re-llamado
+                            </span>
+                          )}
                         </TableCell>
                         <TableCell>
                           {res ? (
