@@ -147,7 +147,7 @@ async function safeFetch<T>(url: string, options?: RequestInit): Promise<T> {
 
 export const api = {
   metricas: (proyectoId?: string): Promise<Metricas> =>
-    safeFetch<Metricas>(`${BASE}/metrics${proyectoId ? `?proyectoId=${proyectoId}` : ""}`),
+    safeFetch<Metricas>(`${BASE}/analytics/metrics${proyectoId ? `?proyectoId=${proyectoId}` : ""}`),
 
   realtimeMetrics: (proyectoId?: string): Promise<RealtimeMetrics> =>
     safeFetch<RealtimeMetrics>(`${BASE}/analytics/realtime${proyectoId ? `?proyectoId=${proyectoId}` : ""}`),
