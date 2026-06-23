@@ -45,13 +45,15 @@ export default function SupervisorRealtimePage() {
         "action_source", "comments"
       ];
       
-      const escapeCsv = (str: string | null | undefined) => {
-        if (!str) return "";
-        return `"${str.replace(/"/g, '""')}"`;
+      const escapeCsv = (val: any) => {
+        if (val === null || val === undefined) return "";
+        const str = String(val);
+        // Remove newlines and carriage returns so Excel doesn't break the row
+        return `"${str.replace(/"/g, '""').replace(/\n|\r/g, ' ')}"`;
       };
 
       const csvContent = [
-        headers.join(","),
+        headers.join(";"),
         ...data.map(r => {
           const row = r as any;
           return [
@@ -76,7 +78,7 @@ export default function SupervisorRealtimePage() {
             escapeCsv(row.previous_event_id || row.previousEventId),
             escapeCsv(row.action_source || row.actionSource),
             escapeCsv(row.comments)
-          ].join(",");
+          ].join(";");
         })
       ].join("\n");
       
