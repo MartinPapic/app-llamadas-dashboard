@@ -261,4 +261,21 @@ export const api = {
     if (estado) params.append("estado", estado);
     return safeFetch(`${BASE}/contacts/unlock-bulk?${params.toString()}`, { method: "POST" });
   },
+
+  agentProgress: (): Promise<AgentProgressResponse[]> =>
+    safeFetch(`${BASE}/analytics/agent-progress`),
 };
+
+export interface AgentListProgress {
+  listaId: string;
+  listaNombre: string;
+  totalAsignado: number;
+  totalPendientes: number;
+  totalGestionadosPorEsteAgente: number;
+}
+
+export interface AgentProgressResponse {
+  agenteId: string;
+  agenteNombre: string;
+  listas: AgentListProgress[];
+}

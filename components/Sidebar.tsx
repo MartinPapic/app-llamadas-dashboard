@@ -11,6 +11,7 @@ const links = [
   { href: "/analytics/global", label: "Rendimiento", icon: BarChart3 },
   { href: "/analytics/metas", label: "Avance de Metas", icon: Target },
   { href: "/analytics/agents", label: "Productividad", icon: BarChart3 },
+  { href: "/analytics/agent-progress", label: "Progreso Asignaciones", icon: Briefcase },
   { href: "/analytics/funnel", label: "Salud de Base", icon: BarChart3 },
   { href: "/contactos", label: "Directorio", icon: Users },
   { href: "/llamadas",  label: "Historial Crudo",  icon: Phone },
