@@ -264,6 +264,9 @@ export const api = {
 
   agentProgress: (): Promise<AgentProgressResponse[]> =>
     safeFetch(`${BASE}/analytics/agent-progress`),
+
+  listProgress: (): Promise<ProjectProgressResponse[]> =>
+    safeFetch(`${BASE}/analytics/list-progress`),
 };
 
 export interface AgentListProgress {
@@ -278,4 +281,16 @@ export interface AgentProgressResponse {
   agenteId: string;
   agenteNombre: string;
   listas: AgentListProgress[];
+}
+
+export interface ProjectListProgress {
+  listaNombre: string;
+  enGestion: number;
+  pendientes: number;
+  totalContactos: number;
+}
+
+export interface ProjectProgressResponse {
+  proyectoNombre: string;
+  listas: ProjectListProgress[];
 }
