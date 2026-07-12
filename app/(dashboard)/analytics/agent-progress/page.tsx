@@ -209,7 +209,8 @@ export default function AgentProgressPage() {
                   ) : (
                     <ul className="divide-y divide-slate-100">
                       {proyecto.listas.map((lista, lIdx) => {
-                        const agotado = lista.pendientes === 0;
+                        const completado = lista.pendientes === 0 && lista.enGestion === 0;
+                        const agotado = !completado && lista.pendientes === 0;
                         const muchosAtrapados = lista.enGestion > 10;
                         const porcentajeAvance = lista.totalContactos > 0 
                           ? ((lista.totalContactos - lista.pendientes) / lista.totalContactos) * 100 
@@ -221,12 +222,20 @@ export default function AgentProgressPage() {
                               <h4 className="font-semibold text-slate-700 text-sm truncate pr-2" title={lista.listaNombre}>
                                 {lista.listaNombre}
                               </h4>
-                              {agotado && (
-                                <span className="shrink-0 inline-flex items-center gap-1 bg-red-100 text-red-700 text-xs font-bold px-2 py-0.5 rounded-full border border-red-200">
-                                  <AlertTriangle className="w-3 h-3" />
-                                  Bolsa Vacía
-                                </span>
-                              )}
+                              <div className="flex gap-2 shrink-0">
+                                {completado && (
+                                  <span className="shrink-0 inline-flex items-center gap-1 bg-emerald-100 text-emerald-700 text-xs font-bold px-2 py-0.5 rounded-full border border-emerald-200">
+                                    <CheckCircle2 className="w-3 h-3" />
+                                    Completada
+                                  </span>
+                                )}
+                                {agotado && (
+                                  <span className="shrink-0 inline-flex items-center gap-1 bg-red-100 text-red-700 text-xs font-bold px-2 py-0.5 rounded-full border border-red-200">
+                                    <AlertTriangle className="w-3 h-3" />
+                                    Bolsa Vacía
+                                  </span>
+                                )}
+                              </div>
                             </div>
                             
                             <div className="grid grid-cols-3 gap-2 mt-3">
